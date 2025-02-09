@@ -1,6 +1,5 @@
-import { Box, Button, Stack, Toolbar, Typography, useTheme } from "@mui/material"
+import { Box, Button, Stack, Typography } from "@mui/material"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
-import { tokens } from "../../../theme"
 
 import Header from "../../../components/Header";
 import { DeleteOutlineOutlined, EditOutlined } from "@mui/icons-material";
@@ -10,8 +9,6 @@ import { useAuth } from "../../../provider/AuthProvider";
 import axios from "axios";
 
 export default function Patients() {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
 
   const [responsedata, setresponsedata] = useState()
   const { token } = useAuth();
@@ -83,8 +80,8 @@ export default function Patients() {
       renderCell: ({row: {obra_social}}) => { 
         return ( 
         <>
-          {obra_social === true && <Typography pt="16px" color={colors.greenAccent[400]}>Si</Typography>}
-          {obra_social === false && <Typography pt="16px" color={colors.redAccent[400]}>No</Typography>}
+          {obra_social === true && <Typography pt="16px" color="si">Si</Typography>}
+          {obra_social === false && <Typography pt="16px" color="red">No</Typography>}
         </>
         ) 
       },
@@ -96,8 +93,8 @@ export default function Patients() {
       renderCell: () => { 
         return ( 
           <Stack direction="row" spacing={1} mt="15px">
-            <Button variant="outlined" color="warning" size="small" ><EditOutlined/> Editar</Button>
-            <Button variant="outlined" color="error"  size="small"><DeleteOutlineOutlined/> Eliminar</Button>
+            <Button variant="outlined" color="warning" size="small" ><EditOutlined/> </Button>
+            <Button variant="outlined" color="error"  size="small"><DeleteOutlineOutlined/> </Button>
           </Stack>
         ) 
       },
@@ -110,11 +107,11 @@ export default function Patients() {
       <Box m="40px 0 0 0" height="75vh" sx={{
          "& .MuiDataGrid-root ": {border: "none"},
          "& .MuiDataGrid-cell": {borderBottom: "none"},
-         "& .name-column-cell": {color: colors.greenAccent[300]},
-         "& .MuiDataGrid-columnHeader": {backgroundColor: colors.blueAccent[700] , borderBottom: "none"},
-         "& .MuiDataGrid-virtualScroller": {backgroundColor: colors.primary[400]},     
-         "& .MuiDataGrid-toolbarContainer .MuiButton-text": {color: `${colors.grey[100]} !important`},
-         "& .MuiDataGrid-footerContainer": { borderTop: "none", backgroundColor: colors.blueAccent[700]} }}>
+         "& .name-column-cell": {},
+         "& .MuiDataGrid-columnHeader": {borderBottom: "none"},
+         "& .MuiDataGrid-virtualScroller": {},     
+         "& .MuiDataGrid-toolbarContainer .MuiButton-text": {},
+         "& .MuiDataGrid-footerContainer": { borderTop: "none"} }}>
         <DataGrid 
         getRowId={(row) => row.id_persona}
         rows={ responsedata }

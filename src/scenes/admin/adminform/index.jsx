@@ -1,4 +1,4 @@
-import { Alert, Box, Button, CircularProgress, Snackbar, TextField } from "@mui/material"
+import { Alert, Box, Button, Card, CircularProgress, Snackbar, TextField, Typography } from "@mui/material"
 import { Formik } from "formik"
 import * as yup from "yup"
 import Header from "../../../components/Header"
@@ -81,7 +81,9 @@ export default function AdminForm() {
 
   return (
     <Box m="20px">
-      <Header title="Crear perfil de empleado" />
+      <Header title="Crear perfil de empleado" subtitle="Formulario de inscripción" />
+      <Card sx={{pb:4, pt:2, px:2, m:2}}>
+      <Typography variant="h4" color="green" mb={4}>Datos</Typography>
       <Formik 
         onSubmit={handleFormSubmit} 
         initialValues={initialValues}
@@ -231,6 +233,7 @@ export default function AdminForm() {
           </form>
         )}
       </Formik>
+      </Card>
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

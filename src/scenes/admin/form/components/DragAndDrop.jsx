@@ -145,7 +145,7 @@ const DragAndDrop = ({ handleServices }) => {
   return (
     <Box sx={{ p: 3, maxWidth: 1200 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="h4">Servicios</Typography>
+        <Typography variant="h4" color="green" mb={4}>Servicios</Typography>
       </Box>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Box

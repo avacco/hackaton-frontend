@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Box, IconButton, useTheme, AppBar, Container, Toolbar, Typography, Menu, MenuItem, Tooltip, Button} from "@mui/material";
+import { Box, IconButton, AppBar, Container, Toolbar, Typography, Menu, MenuItem, Tooltip, Button } from "@mui/material";
 import { LoginOutlined } from "@mui/icons-material";
-import { tokens } from "../theme";
 import { useNavigate } from "react-router-dom";
 import { GridMenuIcon } from "@mui/x-data-grid";
 
@@ -11,8 +10,6 @@ export default function Topbar() {
   // Items de menu de navegacion, usado por el topbar normal y el de movil.
   const topbarItems = [
     { title: "Inicio", nav: "/" },
-    { title: "Servicios", nav: "/services" },
-    { title: "Información ", nav: "/information" },
     { title: "Realizar una consulta ", nav: "/consultation" },
     { title: "Historial de paciente", nav: "/examinations" },
     { title: "Nosotros", nav: "/about" },
@@ -20,8 +17,6 @@ export default function Topbar() {
   ]
 
   
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate()
 
   const [anchorElNav, setAnchorElNav] = useState(null);
@@ -40,7 +35,7 @@ export default function Topbar() {
   };
 
   return (
-      <AppBar sx={{backgroundColor:colors.primary[400]}} color={colors.primary[400]} position="static">
+      <AppBar sx={{backgroundColor:""}} color="" position="static">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <Typography
@@ -107,18 +102,18 @@ export default function Topbar() {
                 mr: 2,
                 display: { xs: 'flex', md: 'none' },
                 flexGrow: 1,
-                fontFamily: 'monospace',
-                fontWeight: 700,
-                letterSpacing: '.3rem',
-                color: 'inherit',
+                fontWeight: 500,
+                letterSpacing: '.1rem',
                 textDecoration: 'none',
+                fontSize: 30,
+                color:"#2293CA",
               }}
             >
-              JUNTO SALUD
+              Junto Salud
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                 {topbarItems.map((item, index) => (
-                  <Button key={index} onClick={() => navigate(item.nav)} sx={{ my: 2, display: 'block', color:colors.primary[100] }}>
+                  <Button key={index} onClick={() => navigate(item.nav)} sx={{ my: 2, display: 'block' }}>
                     <Typography>{item.title}</Typography>
                   </Button>
                 ))}

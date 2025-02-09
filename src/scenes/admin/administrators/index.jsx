@@ -1,6 +1,5 @@
-import { Box, Button, Stack, Typography, useTheme } from "@mui/material"
+import { Box, Button, Stack } from "@mui/material"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
-import { tokens } from "../../../theme"
 import { esES } from '@mui/x-data-grid/locales';
 import Header from "../../../components/Header";
 import { DeleteOutlineOutlined, EditOutlined } from "@mui/icons-material";
@@ -9,8 +8,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../../provider/AuthProvider";
 
 export default function Administrators() {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
 
   const [responsedata, setresponsedata] = useState()
   const { token } = useAuth();
@@ -56,7 +53,7 @@ export default function Administrators() {
       flex: 1
     },
     {
-      field: "fecha_nac", 
+      field: "fechaNac", 
       headerName: "Fecha de nacimiento", 
       flex: 1
     },
@@ -81,7 +78,7 @@ export default function Administrators() {
       flex: 1
     },
     {
-      field: "role", 
+      field: "rol", 
       headerName: "Rol", 
       flex: 1
     },
@@ -92,8 +89,8 @@ export default function Administrators() {
       renderCell: () => { 
         return ( 
           <Stack direction="row" spacing={1} mt="15px">
-            <Button variant="outlined" color="warning" size="small" ><EditOutlined/> Editar</Button>
-            <Button variant="outlined" color="error"  size="small"><DeleteOutlineOutlined/> Eliminar</Button>
+            <Button variant="outlined" color="warning" size="small" ><EditOutlined/> </Button>
+            <Button variant="outlined" color="error"  size="small"><DeleteOutlineOutlined/> </Button>
           </Stack>
         ) 
       },
@@ -106,11 +103,11 @@ export default function Administrators() {
       <Box m="40px 0 0 0" height="75vh" sx={{
          "& .MuiDataGrid-root ": {border: "none"},
          "& .MuiDataGrid-cell": {borderBottom: "none"},
-         "& .name-column-cell": {color: colors.greenAccent[300]},
-         "& .MuiDataGrid-columnHeader": {backgroundColor: colors.blueAccent[700] , borderBottom: "none"},
-         "& .MuiDataGrid-virtualScroller": {backgroundColor: colors.primary[400]},
-         "& .MuiDataGrid-toolbarContainer .MuiButton-text": {color: `${colors.grey[100]} !important`},
-         "& .MuiDataGrid-footerContainer": { borderTop: "none", backgroundColor: colors.blueAccent[700]} }}> 
+         "& .name-column-cell": {},
+         "& .MuiDataGrid-columnHeader": {borderBottom: "none"},
+         "& .MuiDataGrid-virtualScroller": {},
+         "& .MuiDataGrid-toolbarContainer .MuiButton-text": {},
+         "& .MuiDataGrid-footerContainer": { borderTop: "none"} }}> 
         <DataGrid 
         getRowId={(row) => row.id_persona}
         rows={ responsedata }

@@ -1,6 +1,5 @@
 import { Box, Button, Stack, Typography, useTheme } from "@mui/material"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
-import { tokens } from "../../../theme"
 import { esES } from '@mui/x-data-grid/locales';
 
 import Header from "../../../components/Header";
@@ -10,8 +9,7 @@ import { useAuth } from "../../../provider/AuthProvider";
 import axios from "axios";
 
 export default function Invoices() {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+
   const route = import.meta.env.VITE_API_ROUTE;
   const [responsedata, setresponsedata] = useState()
   const { token } = useAuth();
@@ -58,7 +56,7 @@ export default function Invoices() {
       flex: 1,
       renderCell: (params) => { 
         return (
-          <Typography mt="15px" color={colors.greenAccent[500]}>
+          <Typography mt="15px" color="green">
             ${params.row.montoTotal}
           </Typography>
         )
@@ -110,11 +108,11 @@ export default function Invoices() {
       <Box m="40px 0 0 0" height="75vh" sx={{
          "& .MuiDataGrid-root ": {border: "none"},
          "& .MuiDataGrid-cell": {borderBottom: "none"},
-         "& .name-column-cell": {color: colors.greenAccent[300]},
-         "& .MuiDataGrid-columnHeader": {backgroundColor: colors.blueAccent[700] , borderBottom: "none"},
-         "& .MuiDataGrid-virtualScroller": {backgroundColor: colors.primary[400]},
-         "& .MuiDataGrid-toolbarContainer .MuiButton-text": {color: `${colors.grey[100]} !important`},
-         "& .MuiDataGrid-footerContainer": { borderTop: "none", backgroundColor: colors.blueAccent[700]} }}> 
+         "& .name-column-cell": {},
+         "& .MuiDataGrid-columnHeader": {borderBottom: "none"},
+         "& .MuiDataGrid-virtualScroller": {},
+         "& .MuiDataGrid-toolbarContainer .MuiButton-text": {},
+         "& .MuiDataGrid-footerContainer": { borderTop: "none"} }}> 
         <DataGrid 
         rows={ responsedata }
         columns={ columns } 

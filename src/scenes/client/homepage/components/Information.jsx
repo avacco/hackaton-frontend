@@ -1,8 +1,6 @@
 import { Box, Button, Card, CardContent, CardHeader, CardMedia, Collapse, Container, Grid2, IconButton, Typography, useTheme } from '@mui/material'
 import { useState } from 'react'
 import { FaBed, FaCalendarCheck, FaPrescription, FaQuestion } from 'react-icons/fa'
-import GlobalCarousel from '../../../components/GlobalCarousel'
-import { Footer } from '../../../components/Footer'
 import FAQ from './infocards/FAQ'
 import { Close } from '@mui/icons-material'
 import Surgery from './infocards/Surgery'
@@ -65,12 +63,8 @@ const Information = () => {
       ]
 
   return (
-    <>
-    {/* Este componente se muestra desde la homepage, pero tambien es su propia pagina, por lo que solo muestra el carrusel si se esta viendo desde su propia pagina. */}
-      { location.href.includes("/information") &&
-        <GlobalCarousel />
-      }
-      <Container sx={{py:10}}>
+    
+    <Container sx={{py:10}}>
       <Typography variant="h3" textAlign="center" mb={6}>
           Información
       </Typography>
@@ -108,13 +102,7 @@ const Information = () => {
           }
         </Collapse>
     </Container>
-
-    {/* Este componente se muestra desde la homepage, pero tambien es su propia pagina, por lo que solo muestra el footer si se esta viendo desde su propia pagina. */}
-    { location.href.includes("/information") &&
-        <Footer />
-      }
-
-  </>
+  
   )
 }
 

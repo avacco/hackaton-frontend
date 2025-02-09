@@ -11,12 +11,12 @@ const Contact = () => {
 
 
   const initialValues = {
-    firstName: "Andres",
-    lastName: "Vargas",
-    email: "correo@correo.com",
-    phone: "56912123434",
-    reason: "Otro",
-    message: "Prueba de formulario",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    reason: "",
+    message: "",
   }
   
   const formSchema = yup.object().shape({

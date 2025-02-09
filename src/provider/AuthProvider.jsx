@@ -16,10 +16,8 @@ const AuthProvider = ({ children }) => {
   // Define los headers por defecto en axios y cambia el token si este cambia.
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common["Authorization"] = "Bearer " + token;
       localStorage.setItem('auth_token',token);
     } else {
-      delete axios.defaults.headers.common["Authorization"];
       localStorage.removeItem('auth_token')
     }
   }, [token]);

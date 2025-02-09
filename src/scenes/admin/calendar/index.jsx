@@ -5,15 +5,12 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import { formatDate } from "@fullcalendar/core" 
 import listPlugin from "@fullcalendar/list";
 import interactionPlugin from '@fullcalendar/interaction'
-import { Box, List, ListItem, ListItemText, Typography, useTheme } from "@mui/material"
+import { Box, List, ListItem, ListItemText, Typography } from "@mui/material"
 import Header from "../../../components/Header"
-import { tokens } from "../../../theme"
 import esLocale from '@fullcalendar/core/locales/es';
 
 export default function Calendar() {
   
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const [currentEvents, setCurrentEvents] = useState([]);
   const route = import.meta.env.VITE_API_ROUTE;
   
@@ -44,7 +41,7 @@ export default function Calendar() {
     <Box m="20px">
       <Header title="Calendario" subtitle="Vista de turnos en calendario" />
       <Box display="flex" justifyContent="space-between">
-        <Box flex="1 1 20%" backgroundColor={colors.primary[400]} p="15px" borderRadius="4px">
+        <Box flex="1 1 20%" p="15px" borderRadius="4px">
           <Typography variant="h5">
             Turnos
           </Typography>
@@ -52,7 +49,7 @@ export default function Calendar() {
             {currentEvents.map((turn) => (
               <ListItem 
               key={turn.id} 
-              sx={{ backgroundColor: colors.primary[900], margin: "10px 0", borderRadius: "2px"}}
+              sx={{ margin: "10px 0", borderRadius: "2px"}}
               >
                 <ListItemText 
                 primary={

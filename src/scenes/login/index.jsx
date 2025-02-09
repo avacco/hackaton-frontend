@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import {Box, Button,  Card,  CardContent, IconButton, InputAdornment,  TextField, Typography, useTheme, CircularProgress, Snackbar, Alert} from "@mui/material";
+import {Box, Button,  Card,  CardContent, IconButton, InputAdornment,  TextField, Typography, CircularProgress, Snackbar, Alert} from "@mui/material";
 import { VisibilityOffOutlined, VisibilityOutlined, LockOutlined, PersonOutlineOutlined} from "@mui/icons-material";
-import { tokens } from "../../theme";
 import * as yup from 'yup'
 import { Formik } from "formik";
 import axios from "axios";
@@ -22,8 +21,6 @@ const LoginForm = () => {
     password: "segura123",
   };
 
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -78,7 +75,6 @@ const LoginForm = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: theme.palette.background.default
       }}
     >
       <Formik
@@ -87,7 +83,7 @@ const LoginForm = () => {
         validationSchema={userSchema}
       >
         {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
-        <Card sx={{ backgroundColor: colors.primary[400] }}>
+        <Card sx={{backgroundColor:"#F8F9FA"}}>
           <CardContent>
             <Typography variant="h3" align="center" gutterBottom>
               Bienvenido
@@ -150,7 +146,7 @@ const LoginForm = () => {
               <Button
                 fullWidth
                 variant="contained"
-                color="secondary"
+                color="primary"
                 type="submit"
                 disabled={loading}
                 sx={{ mb: 3, py: 1.5 }}

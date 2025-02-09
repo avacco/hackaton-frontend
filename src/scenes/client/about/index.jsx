@@ -90,8 +90,7 @@ const About = () => {
 
   const menuItems = [
     { id: "about", label: "Sobre nosotros" },
-    { id: "team", label: "Nuestro equipo" },
-    { id: "history", label: "Nuestra historia" }
+    { id: "history", label: "Nuestra historia" },
   ];
 
   const renderContent = () => {
@@ -137,31 +136,7 @@ const About = () => {
             
           </Container>
         );
-      case "team":
-        return (
-          <Container>
-            <Typography variant="h3" mb={6}>Nuestro equipo</Typography>
-            <Grid2 container spacing={3}>
-              {teamData.map((member, index) => (
-                <Grid2 item xs={12} sm={6} md={4} key={index}>
-                  <Card sx={{ height: "100%" }}>
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={member.image}
-                      alt={member.name}
-                    />
-                    <CardContent>
-                      <Typography variant="h6">{member.name}</Typography>
-                      <Typography color="textSecondary">{member.specialty}</Typography>
-                      <Typography variant="body2" sx={{ mt: 1 }}>{member.bio}</Typography>
-                    </CardContent>
-                  </Card>
-                </Grid2>
-              ))}
-            </Grid2>
-          </Container>
-        );
+
       case "history":
         return (
           <Container sx={isMobile ? {} : {minWidth:"1000px"}}>

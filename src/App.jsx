@@ -1,7 +1,6 @@
-import { ColorModeContext } from './theme'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import Topbar from './components/Topbar'
-import { useMode } from './theme';
+
 import { Route, Routes } from 'react-router-dom';
 import Dashboard from './scenes/admin/dashboard';
 import Sidebar from './components/Sidebar';
@@ -16,19 +15,18 @@ import AuthProvider from './provider/AuthProvider';
 import Administrators from './scenes/admin/administrators';
 import AdminForm from './scenes/admin/adminform';
 import Homepage from './scenes/client/homepage';
-import Information from './scenes/client/information';
+import Information from './scenes/client/homepage/components/Information';
 import NotFound from './scenes/global/NotFound';
 import Contact from './scenes/client/contact';
 import Consultation from './scenes/client/consultation';
 import Examinations from './scenes/client/examinations';
 import About from './scenes/client/about';
-import Services from './scenes/client/services';
+import Services from './scenes/client/homepage/components/Services';
+import { theme } from './theme'
 
 function App() {
 
-
   const [isLoading, setIsLoading] = useState(true);
-  const [theme, colorMode] = useMode();
 
   const [token, setToken] = useState()
   useEffect(() => {
@@ -40,7 +38,6 @@ function App() {
   }, [token])
 
   return (
-  <ColorModeContext.Provider value={colorMode}>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
@@ -51,8 +48,6 @@ function App() {
           {!location.href.includes("/system") && <Topbar/>}
             <Routes>
               <Route path="/" element={<Homepage />} />
-              <Route path="/services" element={<Services />} /> 
-              <Route path="/information" element={<Information />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/login" element={<LoginForm />} />  
               <Route path="/consultation" element={<Consultation />} />  
@@ -79,8 +74,7 @@ function App() {
           </main>
       </div>
       </AuthProvider>
-    </ThemeProvider>
-  </ColorModeContext.Provider>
+      </ThemeProvider>
   )
 }
 

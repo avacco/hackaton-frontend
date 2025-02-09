@@ -77,14 +77,14 @@ export default function Form() {
   const [step, setStep] = useState(1)
 
   // Para setear hora de inicio y finalizacion de jornada y si es un dia laboral.
-  const [startHour, setStartHour] = useState("")
-  const [finishHour, setfinishHour] = useState("")
+  const [startHour, setStartHour] = useState(dayjs().hour(8))
+  const [finishHour, setfinishHour] = useState(dayjs().hour(8))
   const [isRestDay, setIsRestDay] = useState(false);
 
   // Para guardar la semana laboral
   const [workweek, setWorkweek] = useState([])
 
-  const [defaultTime, setdefaultTime] = useState(dayjs('2025-02-12T08:00'))
+
   const [servicesSelected, setServicesSelected] = useState([])
   const [loading, setLoading] = useState(false)
 
@@ -107,6 +107,12 @@ export default function Form() {
   const undoWorkday = () => {
 
     workweek.pop()
+
+    setSnackbar({
+      open: true,
+      message: "Jornada revertida.",
+      severity: "info"
+    });
 
     switch (selectedDay) {
 
@@ -144,9 +150,30 @@ export default function Form() {
 
   const confirmWorkday = () => {
 
-    console.log(`Hora inicio: ${startHour.format("HH:mm")}`)
-    console.log(`Hora termino: ${finishHour.format("HH:mm")}`)
-    console.log("day: "+selectedDay)
+    // Verifica que las fechas sean validas.
+    if (finishHour.isBefore(startHour)){
+
+      setSnackbar({
+        open: true,
+        message: "Fechas inválidas. Termino de jornada es anterior a inicio de jornada",
+        severity: "error"
+      });
+
+      return
+    }
+
+    if (finishHour.isSame(startHour)){
+
+      setSnackbar({
+        open: true,
+        message: "Fechas inválidas. Termino e inicio de jornadas son el mismo valor",
+        severity: "error"
+      });
+
+      return
+    }
+
+    // Si pasa las verificaciones, crea la jornada laboral con su hora de inicio, final, dia de la semana y si es o no dia de descanso.
 
     let workDay = {
       horaInicio: startHour.format("HH:mm"),
@@ -155,9 +182,16 @@ export default function Form() {
       descanso: isRestDay
     }
 
+    // Añade la jornada a la semana laboral
     workweek.push(workDay)
 
-    console.log(workweek)
+    setSnackbar({
+      open: true,
+      message: "Jornada establecida.",
+      severity: "info"
+    });
+
+    // Cambia el dia a ser asignado, cuando llegue al ultimo, habilita el boton de enviar formulario.
 
     switch (selectedDay) {
       case "MONDAY":
@@ -207,13 +241,16 @@ export default function Form() {
 
   const handleFormSubmit = async (values) => {
     setLoading(true)
-
-
+/*
+    workweek.forEach((element) => {
+      if(element.fechaFinal > element.fechaInicio) return
+    })
+*/
+  // Prepara formulario con valores del form en si, mas los datos de servicios prestados y horario laboral
     let preparedForm = {
       ...values,
       serviciosMedicos: servicesSelected,
       listaTurno: workweek
-
     }
 
     await axios
@@ -230,7 +267,6 @@ export default function Form() {
                 
 
             }).catch((error) => {
-              console.log(error)
                 setSnackbar({
                   open: true,
                   message: "Error al intentar añadir medico.",
@@ -244,7 +280,8 @@ export default function Form() {
   return (
     <Box m="20px">
       
-      <Header title="Crear perfil de médico" />
+      <Header title="Crear perfil de médico" subtitle="Formulario de inscripción" />
+      
       <Formik 
         onSubmit={handleFormSubmit} 
         initialValues={initialValues}
@@ -254,199 +291,208 @@ export default function Form() {
           <form onSubmit={handleSubmit}>
                                           {/* Con este pedazo de codigo puedo usar span 1-4 para dividir en cuatro columnas el espacio de la caja. */}
             <Box hidden={step !== 1 ? true : false}>
-            <Box display="grid" gap="30px" gridTemplateColumns="repeat(4, minmax(0,1fr))" sx={{ "& > div": { gridColumn: isNonMobile ? undefined : "span 4"}}}>
-              <TextField 
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="Nombre"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.nombre}
-                  name="nombre"
-                  error={!!touched.nombre && !!errors.nombre} // !! convierte un no boolean a un boolean invertido. En este caso significa que firstName tanto en "touched" como en "errors", debe ser verdadero para mostrar el error.
-                  helperText={touched.nombre && errors.nombre}
-                  sx={{ gridColumn: "span 2" }}
-              />
-              <TextField 
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="Apellido"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.apellido}
-                  name="apellido"
-                  error={!!touched.apellido && !!errors.apellido} 
-                  helperText={touched.apellido && errors.apellido}
-                  sx={{ gridColumn: "span 2" }}
-              />
-              <TextField 
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="DNI o Cedula de identidad"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.dni}
-                  name="dni"
-                  error={!!touched.dni && !!errors.dni} 
-                  helperText={touched.dni && errors.dni}
-                  sx={{ gridColumn: "span 4" }}
-              />
-              <TextField 
-                  fullWidth
-                  variant="filled"
-                  type="date"
-                  label="Fecha de nacimiento"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.fechaNac}
-                  name="fechaNac"
-                  error={!!touched.fechaNac && !!errors.fechaNac} 
-                  helperText={touched.fechaNac && errors.fechaNac}
-                  sx={{ gridColumn: "span 4" }}
-              />             
-              <TextField 
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="Correo"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.email}
-                  name="email"
-                  error={!!touched.email && !!errors.email} 
-                  helperText={touched.email && errors.email}
-                  sx={{ gridColumn: "span 2" }}
-              />
-              <TextField 
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="Contacto"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.telefono}
-                  name="telefono"
-                  error={!!touched.telefono && !!errors.telefono} 
-                  helperText={touched.telefono && errors.telefono}
-                  sx={{ gridColumn: "span 2" }}
-              />
-              <TextField 
-                  fullWidth
-                  variant="filled"
-                  type="text"
-                  label="Dirección"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.direccion}
-                  name="direccion"
-                  error={!!touched.direccion && !!errors.direccion} 
-                  helperText={touched.direccion && errors.direccion}
-                  sx={{ gridColumn: "span 4" }}
-              />
-              <TextField 
-                  fullWidth
-                  variant="filled"
-                  type="number"
-                  label="Sueldo"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  value={values.sueldo}
-                  name="sueldo"
-                  error={!!touched.sueldo && !!errors.sueldo} 
-                  helperText={touched.sueldo && errors.sueldo}
-                  sx={{ gridColumn: "span 4" }}
-              />
-              <TextField 
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Especialidad"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.especialidadMedica}
-                name="especialidadMedica"
-                error={!!touched.especialidadMedica && !!errors.especialidadMedica} 
-                helperText={touched.especialidadMedica && errors.especialidadMedica}
-                sx={{ gridColumn: "span 4" }}
-              />
+              <Card sx={{pb:4, pt:2, px:2, m:2}}>
+              <Typography variant="h4" color="green" mb={4}>Datos</Typography>
+                <Box display="grid" gap="30px" gridTemplateColumns="repeat(4, minmax(0,1fr))" sx={{ "& > div": { gridColumn: isNonMobile ? undefined : "span 4"}}}>
+                  <TextField 
+                      fullWidth
+                      variant="filled"
+                      type="text"
+                      label="Nombre"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      value={values.nombre}
+                      name="nombre"
+                      error={!!touched.nombre && !!errors.nombre} // !! convierte un no boolean a un boolean invertido. En este caso significa que firstName tanto en "touched" como en "errors", debe ser verdadero para mostrar el error.
+                      helperText={touched.nombre && errors.nombre}
+                      sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField 
+                      fullWidth
+                      variant="filled"
+                      type="text"
+                      label="Apellido"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      value={values.apellido}
+                      name="apellido"
+                      error={!!touched.apellido && !!errors.apellido} 
+                      helperText={touched.apellido && errors.apellido}
+                      sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField 
+                      fullWidth
+                      variant="filled"
+                      type="text"
+                      label="DNI o Cedula de identidad"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      value={values.dni}
+                      name="dni"
+                      error={!!touched.dni && !!errors.dni} 
+                      helperText={touched.dni && errors.dni}
+                      sx={{ gridColumn: "span 4" }}
+                  />
+                  <TextField 
+                      fullWidth
+                      variant="filled"
+                      type="date"
+                      label="Fecha de nacimiento"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      value={values.fechaNac}
+                      name="fechaNac"
+                      error={!!touched.fechaNac && !!errors.fechaNac} 
+                      helperText={touched.fechaNac && errors.fechaNac}
+                      sx={{ gridColumn: "span 4" }}
+                  />             
+                  <TextField 
+                      fullWidth
+                      variant="filled"
+                      type="text"
+                      label="Correo"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      value={values.email}
+                      name="email"
+                      error={!!touched.email && !!errors.email} 
+                      helperText={touched.email && errors.email}
+                      sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField 
+                      fullWidth
+                      variant="filled"
+                      type="text"
+                      label="Contacto"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      value={values.telefono}
+                      name="telefono"
+                      error={!!touched.telefono && !!errors.telefono} 
+                      helperText={touched.telefono && errors.telefono}
+                      sx={{ gridColumn: "span 2" }}
+                  />
+                  <TextField 
+                      fullWidth
+                      variant="filled"
+                      type="text"
+                      label="Dirección"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      value={values.direccion}
+                      name="direccion"
+                      error={!!touched.direccion && !!errors.direccion} 
+                      helperText={touched.direccion && errors.direccion}
+                      sx={{ gridColumn: "span 4" }}
+                  />
+                  <TextField 
+                      fullWidth
+                      variant="filled"
+                      type="number"
+                      label="Sueldo"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      value={values.sueldo}
+                      name="sueldo"
+                      error={!!touched.sueldo && !!errors.sueldo} 
+                      helperText={touched.sueldo && errors.sueldo}
+                      sx={{ gridColumn: "span 4" }}
+                  />
+                  <TextField 
+                    fullWidth
+                    variant="filled"
+                    type="text"
+                    label="Especialidad"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.especialidadMedica}
+                    name="especialidadMedica"
+                    error={!!touched.especialidadMedica && !!errors.especialidadMedica} 
+                    helperText={touched.especialidadMedica && errors.especialidadMedica}
+                    sx={{ gridColumn: "span 4" }}
+                  />
 
+                </Box>
+              </Card>
             </Box>
-            </Box>
+
             <Box hidden={step !== 2 ? true : false}>
+            <Card sx={{pb:2, m:2}}>
               <DragAndDrop handleServices={handleServices} />
+            </Card>
             </Box>
 
             <Box hidden={step !== 3 ? true : false}>
-              <Typography> Jornada laboral</Typography>
-              <ButtonGroup disabled sx={{mb:10, mt:4}} variant="contained">
-              {daysOfWeek.map((item) => (
-                <Button 
-                  sx={{color:"black!important"}}
-                  key={item.id} 
-                  variant={selectedDay === item.send ? "contained" : "text"}
-                  onClick={() => { setSelectedDay(item.send)} }
-                >
-                  {item.name}
-                </Button>
-              ))}
-              </ButtonGroup>
-              <Box>
-              <FormControlLabel sx={{ml:3}} control={<Checkbox checked={isRestDay} onClick={() => setIsRestDay(!isRestDay)} />} label="Dia de descanso" />
-              </Box>
-              <Grid2 container>
-                <Grid2 size={6}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <Typography variant="h4" align="center" gutterBottom>
-                      Hora inicio
-                    </Typography>
-                    <Typography variant="h6" align="center" gutterBottom>
-                      Seleccione una hora
-                    </Typography>
-                    <DigitalClock 
-                      sx={{scrollbarWidth:'none', ml:2}} 
-                      defaultValue={defaultTime} 
-                      ampm={false} 
-                      minTime={dayjs().hour(7)}
-                      maxTime={dayjs().hour(20).minute(0)}
-                      onChange={handleStartHour}
-                    />
-                  </LocalizationProvider>
+              <Card sx={{p:2, m:2}}>
+                <Typography variant="h4" color="green"> Jornada laboral</Typography>
+                <ButtonGroup disabled sx={{mb:10, mt:4}} variant="contained">
+                {daysOfWeek.map((item) => (
+                  <Button 
+                    sx={{color:"black!important"}}
+                    key={item.id} 
+                    variant={selectedDay === item.send ? "contained" : "text"}
+                    onClick={() => { setSelectedDay(item.send)} }
+                  >
+                    {item.name}
+                  </Button>
+                ))}
+                </ButtonGroup>
+                <Box>
+                <FormControlLabel sx={{ml:3}} control={<Checkbox checked={isRestDay} onClick={() => setIsRestDay(!isRestDay)} />} label="Dia de descanso" />
+                </Box>
+                <Grid2 container>
+                  <Grid2 size={6}>
+                    <Card sx={{mx:2}}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <Typography variant="h4" align="center" gutterBottom>
+                        Hora inicio
+                      </Typography>
+                      <Typography variant="h6" align="center" gutterBottom>
+                        Seleccione una hora
+                      </Typography>
+                      <DigitalClock 
+                        sx={{scrollbarWidth:'none', ml:2}} 
+                        ampm={false} 
+                        minTime={dayjs().hour(7).minute(30)}
+                        maxTime={dayjs().hour(20).minute(0)}
+                        onChange={handleStartHour}
+                      />
+                    </LocalizationProvider>
+                    </Card>
+                  </Grid2>
+                  <Grid2 size={6}>
+                    <Card sx={{mx:2}}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <Typography variant="h4" align="center" gutterBottom>
+                        Hora termino
+                      </Typography>
+                      <Typography variant="h6" align="center" gutterBottom>
+                        Seleccione una hora
+                      </Typography>
+                      <DigitalClock 
+                        sx={{scrollbarWidth:'none', ml:2}}
+                        ampm={false} 
+                        minTime={startHour.add(30,"minutes")}
+                        maxTime={dayjs().hour(20).minute(0)}
+                        onChange={handleFinishHour}
+                      />
+                    </LocalizationProvider>
+                    </Card>
+                  </Grid2>
                 </Grid2>
-                <Grid2 size={6}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <Typography variant="h4" align="center" gutterBottom>
-                      Hora termino
-                    </Typography>
-                    <Typography variant="h6" align="center" gutterBottom>
-                      Seleccione una hora
-                    </Typography>
-                    <DigitalClock 
-                      sx={{scrollbarWidth:'none', ml:2}} 
-                      defaultValue={defaultTime} 
-                      ampm={false} 
-                      minTime={dayjs().hour(7)}
-                      maxTime={dayjs().hour(20).minute(0)}
-                      onChange={handleFinishHour}
-                    />
-                  </LocalizationProvider>
-                </Grid2>
-              </Grid2>
-              <Button disabled={lastStep} sx={{my:2}} variant="contained" onClick={confirmWorkday}>Confirmar jornada</Button>
-              <Button sx={{m:2}} disabled={selectedDay === "MONDAY" ? true : false} variant="contained" onClick={undoWorkday}>Deshacer jornada</Button>
+                <Button sx={{m:2}} disabled={selectedDay === "MONDAY" ? true : false} variant="contained" onClick={undoWorkday}>Deshacer jornada</Button>
+                <Button disabled={lastStep} sx={{my:2}} variant="contained" onClick={confirmWorkday}>Confirmar jornada</Button>
+              </Card>
             </Box>
             
             <Box display="flex" justifyContent="end" mt="20px">
-              <Button disabled={step === 1 ? true : false} onClick={() => setStep(step-1)} type="button" color="secondary" variant="contained">
+              <Button disabled={step === 1 ? true : false} onClick={() => setStep(step-1)} type="button" color="primary" variant="contained">
               Atras
               </Button>
-              <Button variant="outlined" onClick={() => console.log(workweek)}>check</Button>
-              <Button disabled={step === 3 ? true : false} onClick={() => setStep(step+1)} type="button" color="secondary" variant="contained">
+              <Button disabled={step === 3 ? true : false} onClick={() => setStep(step+1)} type="button" color="primary" variant="contained">
               Siguiente
               </Button>
-              <Button disabled={step === 3 ? false : true} type="submit" color="secondary" variant="contained">
+              <Button sx={{ml:2}} disabled={lastStep ? false : true} type="submit" color="secondary" variant="contained">
                 {loading ? <CircularProgress size={24} color="inherit" /> : "Añadir medico"}
               </Button>
             </Box>

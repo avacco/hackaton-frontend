@@ -1,8 +1,8 @@
 import {  Box,  Button, Card,  CardContent, CardMedia,  Container,  Typography, Grid2 } from "@mui/material";
 import { Footer } from "../../../components/Footer";
-import Information from "../information";
+import Information from "./components/Information";
 import GlobalCarousel from "../../../components/GlobalCarousel";
-import Services from "../services";
+import Services from "./components/Services";
 
 const Homepage = () => {
 
