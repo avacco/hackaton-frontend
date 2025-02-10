@@ -3,7 +3,6 @@ import Topbar from './components/Topbar'
 
 import { Route, Routes } from 'react-router-dom';
 import Dashboard from './scenes/admin/dashboard';
-import Sidebar from './components/Sidebar';
 import Employees from './scenes/admin/employees';
 import Patients from './scenes/admin/patients';
 import Invoices from './scenes/admin/invoices';
@@ -15,14 +14,14 @@ import AuthProvider from './provider/AuthProvider';
 import Administrators from './scenes/admin/administrators';
 import AdminForm from './scenes/admin/adminform';
 import Homepage from './scenes/client/homepage';
-import Information from './scenes/client/homepage/components/Information';
 import NotFound from './scenes/global/NotFound';
 import Contact from './scenes/client/contact';
 import Consultation from './scenes/client/consultation';
 import Examinations from './scenes/client/examinations';
 import About from './scenes/client/about';
-import Services from './scenes/client/homepage/components/Services';
 import { theme } from './theme'
+import SystemWrapper from './scenes/admin';
+import PageWrapper from './scenes/client';
 
 function App() {
 
@@ -41,20 +40,18 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-      <div className='app'>        
-        {/* Oculta sidebar para usuarios fuera del sistema. Debe estar logeado tambien. */}
-      {location.href.includes("/system") && token && <Sidebar/>}
-          <main className='content'>
-          {!location.href.includes("/system") && <Topbar/>}
+
             <Routes>
-              <Route path="/" element={<Homepage />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/login" element={<LoginForm />} />  
-              <Route path="/consultation" element={<Consultation />} />  
-              <Route path="/examinations" element={<Examinations />} /> 
-              <Route path="/about" element={<About />} />  
-              {token && (
-              <>
+              <Route element={<PageWrapper />} >
+                <Route path="/" element={<Homepage />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/consultation" element={<Consultation />} />  
+                <Route path="/examinations" element={<Examinations />} /> 
+                <Route path="/about" element={<About />} />  
+                <Route path="/login" element={<LoginForm/>} /> 
+              </Route>
+
+              <Route path="/system" element={<SystemWrapper />} >  
                 <Route path="/system/dashboard" element={<Dashboard />} />
                 <Route path="/system/administrators" element={<Administrators />} />
                 <Route path="/system/employees" element={<Employees />} />
@@ -62,8 +59,8 @@ function App() {
                 <Route path="/system/invoices" element={<Invoices />} />
                 <Route path="/system/adminform" element={<AdminForm />} />
                 <Route path="/system/form" element={<Form />} />
-              </>
-              )}
+              </Route>
+
               <Route path="/bar" element={<Dashboard />} />
               <Route path="/line" element={<Dashboard />} />
               <Route path="/faq" element={<Dashboard />} />
@@ -71,10 +68,9 @@ function App() {
               <Route path="/system/calendar" element={<Calendar />} />
               <Route path='*' element={<NotFound />} />
             </Routes>
-          </main>
-      </div>
+
       </AuthProvider>
-      </ThemeProvider>
+    </ThemeProvider>
   )
 }
 

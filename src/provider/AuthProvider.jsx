@@ -13,7 +13,7 @@ const AuthProvider = ({ children }) => {
     setAuthToken(newToken);
   };
 
-  // Define los headers por defecto en axios y cambia el token si este cambia.
+  // Guarda el token, o lo elimina si la funcion viene vacia.
   useEffect(() => {
     if (token) {
       localStorage.setItem('auth_token',token);

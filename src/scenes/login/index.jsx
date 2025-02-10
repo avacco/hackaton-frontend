@@ -46,7 +46,6 @@ const LoginForm = () => {
     await axios
               .post("http://localhost:8080/personal/login", values)
               .then((response) => {
-                  console.log(response)
                   setToken(response.data);
                   setSnackbar({
                     open: true,
@@ -54,8 +53,6 @@ const LoginForm = () => {
                     severity: "success"
                   });
                   navigate("/system/dashboard");
-                  location.reload();
-                
 
             }).catch((error) => {
                 console.log(error);

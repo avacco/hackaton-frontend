@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography, useTheme } from "@mui/material"
+import { Alert, Box, Button, Snackbar, Stack, Typography, useTheme } from "@mui/material"
 import { DataGrid, GridToolbar } from "@mui/x-data-grid"
 import { esES } from '@mui/x-data-grid/locales';
 
@@ -13,8 +13,15 @@ export default function Invoices() {
   const route = import.meta.env.VITE_API_ROUTE;
   const [responsedata, setresponsedata] = useState()
   const { token } = useAuth();
-  const { setToken } = useAuth();
 
+  // Popups
+  const [snackbar, setSnackbar] = useState(
+    {
+      open: false,
+      message: "",
+      severity: "success"
+    }
+  );
 
   useEffect(() => {
     axios
@@ -25,9 +32,11 @@ export default function Invoices() {
           setresponsedata(response.data)
         })
         .catch((error) => { 
-          if(error.response.status === 401)
-          setToken();
-          location.reload();
+          setSnackbar({
+            open: true,
+            message: "Error al pedir datos",
+            severity: "error"
+          });
         })
   }, [])
 
@@ -120,6 +129,19 @@ export default function Invoices() {
         localeText={esES.components.MuiDataGrid.defaultProps.localeText} 
         />
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

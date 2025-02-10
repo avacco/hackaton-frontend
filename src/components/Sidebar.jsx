@@ -44,9 +44,8 @@ const Sidebar = () => {
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    setToken();
+    localStorage.removeItem('auth_token')
     navigate("/");
-    location.reload()
   };
 
   return (
