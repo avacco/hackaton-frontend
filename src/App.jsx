@@ -48,7 +48,6 @@ function App() {
                 <Route path="/examinations" element={<Examinations />} /> 
                 <Route path="/about" element={<About />} />  
                 <Route path="/login" element={<LoginForm/>} />
-                <Route path="/calendar" element={<ConsultationCalendar/>} /> 
               </Route>
 
               <Route path="/system" element={<SystemWrapper />} >  
