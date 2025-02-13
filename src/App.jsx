@@ -22,6 +22,7 @@ import About from './scenes/client/about';
 import { theme } from './theme'
 import SystemWrapper from './scenes/admin';
 import PageWrapper from './scenes/client';
+import ConsultationCalendar from './scenes/client/consultation/cards/Calendar';
 
 function App() {
 
@@ -48,7 +49,8 @@ function App() {
                 <Route path="/consultation" element={<Consultation />} />  
                 <Route path="/examinations" element={<Examinations />} /> 
                 <Route path="/about" element={<About />} />  
-                <Route path="/login" element={<LoginForm/>} /> 
+                <Route path="/login" element={<LoginForm/>} />
+                <Route path="/calendar" element={<ConsultationCalendar/>} /> 
               </Route>
 
               <Route path="/system" element={<SystemWrapper />} >  
@@ -59,13 +61,9 @@ function App() {
                 <Route path="/system/invoices" element={<Invoices />} />
                 <Route path="/system/adminform" element={<AdminForm />} />
                 <Route path="/system/form" element={<Form />} />
+                <Route path="/system/calendar" element={<Calendar />} />
               </Route>
-
-              <Route path="/bar" element={<Dashboard />} />
-              <Route path="/line" element={<Dashboard />} />
-              <Route path="/faq" element={<Dashboard />} />
-              <Route path="/geography" element={<Dashboard />} />
-              <Route path="/system/calendar" element={<Calendar />} />
+                            
               <Route path='*' element={<NotFound />} />
             </Routes>
 

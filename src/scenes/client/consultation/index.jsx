@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, Fade, Modal, Backdrop, Collapse } from "@mui/material";
 import { BsTelephone, BsEnvelope, BsClock, BsGeoAlt } from "react-icons/bs";
 import { Footer } from "../../../components/Footer";
@@ -16,13 +16,33 @@ const Consultation = () => {
 
   // Controla los dias que deben ser habilitados. Por defecto estan todos deshabilitados, estos se encargan de habilitarlos.
   const today = dayjs().startOf("day");
-  const lastEnabledDate = today.add(4, "day");
-  
-  // Define las fechas que estaran habilitadas. Esto debe ser conectado a una api para traer los turnos y horarios de los doctores.
-  const shouldDisableDate = (date) => {
+
+  // Reservado para dias colmados
+  const [blockedDates, setBlockedDates] = useState([dayjs("2025-03-03"), dayjs("2025-03-05")])
+
+  // Define los dias de la semana que el medico puede atender
+  const [allowedDays, setAllowedDays] = useState([])
+
+  // Define las fechas que estaran habilitadas. 
+  const shouldDisableDate = useMemo(() => (date) => {
     const currentDate = dayjs(date);
-    return currentDate.isBefore(today) || currentDate.isAfter(lastEnabledDate);
-  };
+
+    if(currentDate.isBefore(today, "day")) {
+      return true;
+    }
+
+    // Verifica si la fecha esta bloqueada
+    const isBlocked = blockedDates.some((blockedDate) => 
+      blockedDate.isSame(currentDate, "day")
+    )
+
+    if(isBlocked) return true
+
+    // Verifica si la fecha esta permitida
+    const dayOfWeek = currentDate.day();
+    return !allowedDays.includes(dayOfWeek);
+
+  }, [blockedDates, allowedDays, today])
 
   // Controles de modal
   const [openModal, setOpenModal] = useState(false)
@@ -57,12 +77,30 @@ const Consultation = () => {
           console.log(error);
         })
   }, [])
+
+  // Se mantiene atento por si cambia el doctor objetivo, recorre la lista de turnos del doctor y setea los adecuados para seleccionarlos en el calendario
+  useEffect(() => {
+    
+    if(targetDoc.listaTurno !== undefined){
+      
+      let allowDay = []
+
+      targetDoc.listaTurno.forEach((turn) => (
+          turn.descanso ? null : allowDay.push(turn.numeroDia)
+      ))
+
+      setAllowedDays(allowDay)
+    }
+
+  }, [targetDoc])
+  
   
   const checkServices = () => {
-    console.log(docs);
+
+    console.log("check: ")
   }
 
-   // Control de primer paso
+   // Control de primer paso (Seleccion de servicio)
    const handleServiceSelection = async (e) => {
     setDoctorDropdown(true); // abre dropdown de doctor, cierra los demas si estaban abiertos
 
@@ -84,17 +122,21 @@ const Consultation = () => {
     setTargetHour(dayjs());
   }
 
-  // Control de segundo paso
+  // Control de segundo paso (Seleccion de medico)
    const handleDoctorSelection = async (e) => {
     setCalendarCard(true);
     setHourCard(false);
 
     setTargetDoc(e.target.value)
+    
     setTargetDay(dayjs());
     setTargetHour(dayjs());
+
+    // Los dias y horas disponibles se calculan en un useEffect mas arriba. 
+
   }
 
-  // Control de tercer paso
+  // Control de tercer paso (Seleccion de fecha)
   // Muestra en consola la fecha seleccionada. Esto sera usado para enviar por api mas adelante.
   const handleDateSelection = (newDate) => {
     setTargetDay(newDate);
@@ -105,7 +147,7 @@ const Consultation = () => {
     
   };
 
-  // Control de cuarto paso
+  // Control de cuarto paso (Seleccion de hora)
   // Muestra en consola la hora seleccionada Esto sera usado para enviar por api mas adelante.
   const handleHourSelection = (newHour) => {
     setTargetHour(newHour);
@@ -251,7 +293,7 @@ const Consultation = () => {
                     >
 
                     {docs.map((item) => (
-                      <MenuItem key={item.id_medico} value={item.id_medico}>{item.nombre}</MenuItem>
+                      <MenuItem key={item.id_medico} value={item}>{item.nombre} {item.apellido}</MenuItem>
                     ))}
 
                     </Select>

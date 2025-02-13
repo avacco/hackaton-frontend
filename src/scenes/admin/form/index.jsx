@@ -11,8 +11,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DigitalClock, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 
-//TODO: Refinar y ajustar, que este componente es delicado y sus piezas aun mas.
-
 export default function Form() {
   const isNonMobile = useMediaQuery("(min-width:600px)");
   const route = import.meta.env.VITE_API_ROUTE;
@@ -72,6 +70,7 @@ export default function Form() {
 
   // Para botones de dia de la semana.
   const [selectedDay, setSelectedDay] = useState("MONDAY")
+  const [dayNumber, setDayNumber] = useState(1)
   
   // Pasos del formulario. Ocultan una parte de este segun su paso.
   const [step, setStep] = useState(1)
@@ -80,6 +79,8 @@ export default function Form() {
   const [startHour, setStartHour] = useState(dayjs().hour(8))
   const [finishHour, setfinishHour] = useState(dayjs().hour(8))
   const [isRestDay, setIsRestDay] = useState(false);
+  const [startLunch, setStartLunch] = useState(dayjs().hour(8))
+  const [finishLunch, setFinishLunch] = useState(dayjs().hour(8))
 
   // Para guardar la semana laboral
   const [workweek, setWorkweek] = useState([])
@@ -93,6 +94,14 @@ export default function Form() {
   // Envia esta funcion a DragAndDrop para que setee el/los servicio(s)
   const handleServices = (services) => {
     setServicesSelected(services)
+  }
+
+  const handleLunchStart = (hour) => {
+    setStartLunch(hour)
+  }
+
+  const handleLunchFinish = (hour) => {
+    setFinishLunch(hour)
   }
 
   const handleStartHour = (hour) => {
@@ -117,27 +126,33 @@ export default function Form() {
     switch (selectedDay) {
 
       case "TUESDAY":
-        setSelectedDay("MONDAY")        
+        setSelectedDay("MONDAY")
+        setDayNumber(1)        
         break;
 
       case "WEDNESDAY":
         setSelectedDay("TUESDAY")
+        setDayNumber(2)        
         break;
 
       case "THURSDAY":
         setSelectedDay("WEDNESDAY") 
+        setDayNumber(3)        
         break;
 
       case "FRIDAY":
         setSelectedDay("THURSDAY")
+        setDayNumber(4)        
         break;
 
       case "SATURDAY":
         setSelectedDay("FRIDAY")
+        setDayNumber(5)        
         break;
 
       case "SUNDAY":
         setlastStep(false)
+        setDayNumber(6)        
         setSelectedDay("SATURDAY")
         break;
     
@@ -148,14 +163,14 @@ export default function Form() {
   }
 
 
-  const confirmWorkday = () => {
+  const confirmWorkday = async () => {
 
     // Verifica que las fechas sean validas.
     if (finishHour.isBefore(startHour)){
 
       setSnackbar({
         open: true,
-        message: "Fechas inválidas. Termino de jornada es anterior a inicio de jornada",
+        message: "Horas inválidas. Término de jornada es anterior a su inicio",
         severity: "error"
       });
 
@@ -166,7 +181,29 @@ export default function Form() {
 
       setSnackbar({
         open: true,
-        message: "Fechas inválidas. Termino e inicio de jornadas son el mismo valor",
+        message: "Horas inválidas. Término e inicio de jornadas son el mismo valor",
+        severity: "error"
+      });
+
+      return
+    }
+
+    if (startLunch.isSame(finishLunch)){
+
+      setSnackbar({
+        open: true,
+        message: "Horas inválidas. Término e inicio de almuerzo son el mismo valor",
+        severity: "error"
+      });
+
+      return
+    }
+
+    if (finishLunch.isBefore(startLunch)){
+
+      setSnackbar({
+        open: true,
+        message: "Horas inválidas. Término de almuerzo es anterior a su inicio.",
         severity: "error"
       });
 
@@ -178,44 +215,53 @@ export default function Form() {
     let workDay = {
       horaInicio: startHour.format("HH:mm"),
       horaFinal: finishHour.format("HH:mm"),
+      horaInicioDescanso: startLunch.format("HH:mm"),
+      horaFinalDescanso: finishLunch.format("HH:mm"),
       diaSemana: selectedDay,
-      descanso: isRestDay
+      descanso: isRestDay,
+      numeroDia: dayNumber
     }
-
-    // Añade la jornada a la semana laboral
-    workweek.push(workDay)
 
     setSnackbar({
       open: true,
-      message: "Jornada establecida.",
-      severity: "info"
-    });
+      message: "Jornada establecida",
+      severity: "success"
+    });   
+
+    // Añade la jornada a la semana laboral
+    workweek.push(workDay)
 
     // Cambia el dia a ser asignado, cuando llegue al ultimo, habilita el boton de enviar formulario.
 
     switch (selectedDay) {
       case "MONDAY":
         setSelectedDay("TUESDAY")
+        setDayNumber(2)        
         break;
       
       case "TUESDAY":
         setSelectedDay("WEDNESDAY")        
+        setDayNumber(3)        
         break;
 
       case "WEDNESDAY":
         setSelectedDay("THURSDAY")
+        setDayNumber(4)        
         break;
 
       case "THURSDAY":
         setSelectedDay("FRIDAY")
+        setDayNumber(5)        
         break;
 
       case "FRIDAY":
         setSelectedDay("SATURDAY")
+        setDayNumber(6)        
         break;
 
       case "SATURDAY":
         setSelectedDay("SUNDAY")
+        setDayNumber(7)        
         break;
 
       case "SUNDAY":
@@ -241,11 +287,7 @@ export default function Form() {
 
   const handleFormSubmit = async (values) => {
     setLoading(true)
-/*
-    workweek.forEach((element) => {
-      if(element.fechaFinal > element.fechaInicio) return
-    })
-*/
+
   // Prepara formulario con valores del form en si, mas los datos de servicios prestados y horario laboral
     let preparedForm = {
       ...values,
@@ -253,8 +295,10 @@ export default function Form() {
       listaTurno: workweek
     }
 
+    console.log(preparedForm)
+
     await axios
-              .post(`${route}/medico/crear`, preparedForm, {
+              .post(`${route}/medico/guardar`, preparedForm, {
                 headers: { Authorization: "Bearer "+token }
               },)
               .then((response) => {
@@ -440,12 +484,13 @@ export default function Form() {
                 <Box>
                 <FormControlLabel sx={{ml:3}} control={<Checkbox checked={isRestDay} onClick={() => setIsRestDay(!isRestDay)} />} label="Dia de descanso" />
                 </Box>
+
                 <Grid2 container>
                   <Grid2 size={6}>
                     <Card sx={{mx:2}}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <Typography variant="h4" align="center" gutterBottom>
-                        Hora inicio
+                        Hora de entrada
                       </Typography>
                       <Typography variant="h6" align="center" gutterBottom>
                         Seleccione una hora
@@ -464,7 +509,7 @@ export default function Form() {
                     <Card sx={{mx:2}}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                       <Typography variant="h4" align="center" gutterBottom>
-                        Hora termino
+                        Hora de salida
                       </Typography>
                       <Typography variant="h6" align="center" gutterBottom>
                         Seleccione una hora
@@ -480,6 +525,49 @@ export default function Form() {
                     </Card>
                   </Grid2>
                 </Grid2>
+
+                <Grid2 container>
+                  <Grid2 size={6}>
+                    <Card sx={{mx:2, mt:4}}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <Typography variant="h4" align="center" gutterBottom>
+                          Inicio de almuerzo
+                        </Typography>
+                        <Typography variant="h6" align="center" gutterBottom>
+                          Seleccione una hora
+                        </Typography>
+                        <DigitalClock 
+                          sx={{scrollbarWidth:'none', ml:2}} 
+                          ampm={false} 
+                          minTime={dayjs().hour(7).minute(30)}
+                          maxTime={dayjs().hour(20).minute(0)}
+                          onChange={handleLunchStart}
+                        />
+                      </LocalizationProvider>
+                    </Card>
+                  </Grid2>
+
+                  <Grid2 size={6}>
+                    <Card sx={{mx:2, mt:4}}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <Typography variant="h4" align="center" gutterBottom>
+                          Término de almuerzo
+                        </Typography>
+                        <Typography variant="h6" align="center" gutterBottom>
+                          Seleccione una hora
+                        </Typography>
+                        <DigitalClock 
+                          sx={{scrollbarWidth:'none', ml:2}}
+                          ampm={false} 
+                          minTime={startHour.add(30,"minutes")}
+                          maxTime={dayjs().hour(20).minute(0)}
+                          onChange={handleLunchFinish}
+                        />
+                      </LocalizationProvider>
+                    </Card>
+                  </Grid2>
+                </Grid2>
+                
                 <Button sx={{m:2}} disabled={selectedDay === "MONDAY" ? true : false} variant="contained" onClick={undoWorkday}>Deshacer jornada</Button>
                 <Button disabled={lastStep} sx={{my:2}} variant="contained" onClick={confirmWorkday}>Confirmar jornada</Button>
               </Card>
@@ -491,6 +579,9 @@ export default function Form() {
               </Button>
               <Button disabled={step === 3 ? true : false} onClick={() => setStep(step+1)} type="button" color="primary" variant="contained">
               Siguiente
+              </Button>
+              <Button  onClick={() => console.log(workweek)} type="button" color="primary" variant="contained">
+              check
               </Button>
               <Button sx={{ml:2}} disabled={lastStep ? false : true} type="submit" color="secondary" variant="contained">
                 {loading ? <CircularProgress size={24} color="inherit" /> : "Añadir medico"}
