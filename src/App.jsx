@@ -1,5 +1,4 @@
 import { CssBaseline, ThemeProvider } from '@mui/material'
-import Topbar from './components/Topbar'
 
 import { Route, Routes } from 'react-router-dom';
 import Dashboard from './scenes/admin/dashboard';
@@ -7,7 +6,6 @@ import Employees from './scenes/admin/employees';
 import Patients from './scenes/admin/patients';
 import Invoices from './scenes/admin/invoices';
 import Form from './scenes/admin/form';
-import Calendar from './scenes/admin/calendar';
 import LoginForm from './scenes/login';
 import { useEffect, useState } from 'react';
 import AuthProvider from './provider/AuthProvider';
@@ -22,7 +20,7 @@ import About from './scenes/client/about';
 import { theme } from './theme'
 import SystemWrapper from './scenes/admin';
 import PageWrapper from './scenes/client';
-import ConsultationCalendar from './scenes/client/consultation/cards/Calendar';
+import Calendar from './scenes/admin/calendar';
 
 function App() {
 
