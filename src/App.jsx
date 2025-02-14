@@ -21,6 +21,7 @@ import { theme } from './theme'
 import SystemWrapper from './scenes/admin';
 import PageWrapper from './scenes/client';
 import Calendar from './scenes/admin/calendar';
+import ServicesForm from './scenes/admin/servicesform';
 
 function App() {
 
@@ -58,6 +59,7 @@ function App() {
                 <Route path="/system/invoices" element={<Invoices />} />
                 <Route path="/system/adminform" element={<AdminForm />} />
                 <Route path="/system/form" element={<Form />} />
+                <Route path="/system/serviceform" element={<ServicesForm />} />
                 <Route path="/system/calendar" element={<Calendar />} />
               </Route>
                             

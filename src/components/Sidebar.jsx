@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ProSidebar, Menu, MenuItem } from 'react-pro-sidebar'
 import { Box, IconButton, Typography } from '@mui/material'
 import { Link, useNavigate } from 'react-router-dom'
-import { HomeOutlined, PeopleOutlineOutlined, ContactsOutlined, ReceiptOutlined, PersonOutlineOutlined, CalendarTodayOutlined, PieChartOutlineOutlined, TimelineOutlined, BarChartOutlined, MenuOutlined, MapOutlined, SupervisorAccountOutlined, AdminPanelSettingsOutlined, LogoutOutlined } from '@mui/icons-material'
+import { HomeOutlined, PeopleOutlineOutlined, ContactsOutlined, ReceiptOutlined, PersonOutlineOutlined, CalendarTodayOutlined, PieChartOutlineOutlined, TimelineOutlined, BarChartOutlined, MenuOutlined, MapOutlined, SupervisorAccountOutlined, AdminPanelSettingsOutlined, LogoutOutlined, ManageAccountsOutlined } from '@mui/icons-material'
 import 'react-pro-sidebar/dist/css/styles.css';
 import { useAuth } from '../provider/AuthProvider'
 import axios from 'axios'
@@ -107,6 +107,7 @@ const Sidebar = () => {
 
             <Item title="Formulario admin" to="/system/adminform/" icon={<SupervisorAccountOutlined />} selected={selected} setSelected={setSelected}/>
             <Item title="Formulario medicos" to="/system/form" icon={<PersonOutlineOutlined />} selected={selected} setSelected={setSelected}/>
+            <Item title="Formulario servicios" to="/system/serviceform" icon={<ManageAccountsOutlined />} selected={selected} setSelected={setSelected}/>
             <Item title="Turnos" to="/system/calendar" icon={<CalendarTodayOutlined />} selected={selected} setSelected={setSelected}/>
 
             <Typography variant='h6' color="black" sx={{ m: "15px 0 5px 20px"}}>Gráficos (WIP)</Typography>
