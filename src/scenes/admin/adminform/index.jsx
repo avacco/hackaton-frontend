@@ -7,7 +7,7 @@ import { useAuth } from "../../../provider/AuthProvider";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
-import { LockOutlined, VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 
 export default function AdminForm() {
   const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -56,7 +56,8 @@ export default function AdminForm() {
     }
   );
 
-
+  // Presionar en editar en la tabla de administradores redirige aqui y trae consigo el ID del personal a editar.
+  // Si existe un ID, se carga la informacion del personal en el formulario.
   const { state } = useLocation();
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function AdminForm() {
             telefono: data.telefono,
             direccion: data.direccion,
             username: data.username,
-            password: "", // No se debe enviar la contraseña
+            password: "", // No se debe recibir la contraseña
             rol: data.rol,
           })
         },
@@ -102,18 +103,15 @@ export default function AdminForm() {
                     open: true,
                     message: state ? "Personal editado" : "Peronal administrativo creado",
                     severity: "success"
-                  });
-                  setLoading(false)
-                
-
+                  });         
             }).catch((error) => {
                 setSnackbar({
                   open: true,
                   message: "Error al intentar crear personal.",
                   severity: "error"
                 });
-                setLoading(false)
-            })
+            }).finally(setLoading(false))
+
   };
 
   return (

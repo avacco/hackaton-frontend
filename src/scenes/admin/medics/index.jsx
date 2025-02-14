@@ -6,11 +6,14 @@ import { DeleteOutlineOutlined, EditOutlined } from "@mui/icons-material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../provider/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 export default function Employees() {
 
   const [responsedata, setresponsedata] = useState()
   const { token } = useAuth();
+
+  const navigate = useNavigate();
 
   // Popups
   const [snackbar, setSnackbar] = useState(
@@ -39,6 +42,28 @@ export default function Employees() {
           });
         })
   }, [])
+
+  const handleDelete = async (id) => {
+    await axios
+      .delete(`${route}/medico/borrar/${id}`, {
+        headers: { Authorization: "Bearer "+token }})
+        .then(response => {
+          setSnackbar({
+            open: true,
+            message: "Médico eliminado",
+            severity: "success"
+          });
+          setresponsedata(responsedata.filter((row) => row.id_persona !== id))
+        })
+      .catch((error) => {
+        setSnackbar({
+          open: true,
+          message: "Error al eliminar",
+          severity: "error"
+        });
+      })
+  }
+
   
   
   // Control de columnas, el field corresponde al nombre de dato al que correspondera la columna
@@ -98,11 +123,11 @@ export default function Employees() {
       field: "actions", 
       headerName: "Acciones", 
       flex: 1, 
-      renderCell: () => { 
+      renderCell: ({ row: { id_persona }}) => { 
         return ( 
           <Stack direction="row" spacing={1} mt="15px">
-            <Button variant="outlined" color="warning" size="small" ><EditOutlined/> </Button>
-            <Button variant="outlined" color="error"  size="small"><DeleteOutlineOutlined/> </Button>
+            <Button variant="outlined" color="warning" size="small" onClick={ () => navigate("/system/form", { state: id_persona })} ><EditOutlined/> </Button>
+            <Button variant="outlined" color="error"  size="small" onClick={ () => handleDelete(id_persona) }><DeleteOutlineOutlined/> </Button>
           </Stack>
         ) 
       },
@@ -111,7 +136,7 @@ export default function Employees() {
   
   return (
     <Box m="20px">
-      <Header title="Empleados" subtitle="Lista de empleados" />
+      <Header title="Médicos" subtitle="Lista de médicos registrados" />
       <Box m="40px 0 0 0" height="75vh" sx={{
          "& .MuiDataGrid-root ": {border: "none"},
          "& .MuiDataGrid-cell": {borderBottom: "none"},

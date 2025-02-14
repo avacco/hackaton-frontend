@@ -2,10 +2,10 @@ import { CssBaseline, ThemeProvider } from '@mui/material'
 
 import { Route, Routes } from 'react-router-dom';
 import Dashboard from './scenes/admin/dashboard';
-import Employees from './scenes/admin/employees';
+import Employees from './scenes/admin/medics';
 import Patients from './scenes/admin/patients';
 import Invoices from './scenes/admin/invoices';
-import Form from './scenes/admin/form';
+import Form from './scenes/admin/medicform';
 import LoginForm from './scenes/login';
 import { useEffect, useState } from 'react';
 import AuthProvider from './provider/AuthProvider';

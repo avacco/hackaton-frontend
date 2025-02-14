@@ -4,12 +4,13 @@ import * as yup from "yup"
 import Header from "../../../components/Header"
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAuth } from "../../../provider/AuthProvider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import DragAndDrop from "./components/DragAndDrop";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DigitalClock, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+import { useLocation } from "react-router-dom";
 
 export default function Form() {
   const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -17,17 +18,18 @@ export default function Form() {
   const { token } = useAuth();
  
   // Valores iniciales para campos de formulario
-  const initialValues = {
-    nombre: "Patricio",
-    apellido: "Garcia",
-    dni: "9126251",
-    fechaNac: "1990-06-10",
-    email: "p.garcia.90@gmail.com",
-    telefono: "54120706721",
-    direccion: "Pj. Coronel 512",
-    sueldo: "3500000",
-    especialidadMedica: "Neurologo",
-  };
+  const [initialValues, setInitialValues] = useState({
+    id_persona: "",
+    nombre: "",
+    apellido: "",
+    dni: "",
+    fechaNac: "",
+    email: "",
+    telefono: "",
+    direccion: "",
+    sueldo: "",
+    especialidadMedica: "",
+  });
 
   // Para una iteracion mas adelante. Name es el nombre para los botones y send es lo que sera enviado
   const daysOfWeek = [
@@ -52,6 +54,9 @@ export default function Form() {
     {
       id: 6, name: "Domingo", send: "SUNDAY"
     },
+    {
+      id: 6, name: "Terminado", send: "TERMINADO"
+    },
   ]
 
 
@@ -68,6 +73,47 @@ export default function Form() {
     especialidadMedica: yup.string().required("Requerido"),
   })
 
+  
+  // Presionar en editar en la tabla de medicos redirige aqui y trae consigo el ID del medico a editar.
+  // Si existe un ID, se carga la informacion del medico en el formulario.
+  const { state } = useLocation();
+
+  useEffect(() => {
+    if(state) {
+
+      axios
+        .get(`${route}/medico/traer/${state}`,{
+           headers: { Authorization: "Bearer "+token }
+          },)
+        .then(response => {
+          setInitialValues({
+            id_persona: response.data.id_persona,
+            nombre: response.data.nombre,
+            apellido: response.data.apellido,
+            dni: response.data.dni,
+            fechaNac: response.data.fechaNac,
+            email: response.data.email,
+            telefono: response.data.telefono,
+            direccion: response.data.direccion,
+            sueldo: response.data.sueldo,
+            especialidadMedica: response.data.especialidadMedica,
+          })
+
+          let turnList = response.data.listaTurno;
+
+          // El fetch trae la lista de turnos desordenada.
+          // Ordena la lista de turnos por numeroDia en orden descendente
+          turnList.sort((a, b) => a.numeroDia - b.numeroDia)
+
+          setWorkweek(response.data.listaTurno)
+          setServicesSelected(response.data.serviciosMedicos)
+          setSelectedDay("TERMINADO")
+        },
+      )
+
+    }
+  }, [state])
+
   // Para botones de dia de la semana.
   const [selectedDay, setSelectedDay] = useState("MONDAY")
   const [dayNumber, setDayNumber] = useState(1)
@@ -75,7 +121,7 @@ export default function Form() {
   // Pasos del formulario. Ocultan una parte de este segun su paso.
   const [step, setStep] = useState(1)
 
-  // Para setear hora de inicio y finalizacion de jornada y si es un dia laboral.
+  // Para setear hora de inicio y finalizacion de jornada, horas de descanso y si es un dia laboral.
   const [startHour, setStartHour] = useState(dayjs().hour(8))
   const [finishHour, setfinishHour] = useState(dayjs().hour(8))
   const [isRestDay, setIsRestDay] = useState(false);
@@ -85,10 +131,10 @@ export default function Form() {
   // Para guardar la semana laboral
   const [workweek, setWorkweek] = useState([])
 
-
   const [servicesSelected, setServicesSelected] = useState([])
   const [loading, setLoading] = useState(false)
 
+  // Para activar o desactivar el boton de creación de medico.
   const [lastStep, setlastStep] = useState(false)
   
   // Envia esta funcion a DragAndDrop para que setee el/los servicio(s)
@@ -114,6 +160,9 @@ export default function Form() {
 
   // Elimina el ultimo dia añadido a la semana laboral y retrocede un paso en los dias laborales.
   const undoWorkday = () => {
+
+    //TODO: Hay un problema que consiste en que si se esta en un edit en vez de un create, los turnos que sean "corregidos" tienen un nuevo ID en vez de usar el id del turno anterior
+    //      Esto se debe a que la funcion de abajo elimina el valor del array y cuando se crea un nuevo turno, este viene sin ID. Cuando es enviado al backend, al ver que no hay ID, crea uno nuevo
 
     workweek.pop()
 
@@ -151,9 +200,13 @@ export default function Form() {
         break;
 
       case "SUNDAY":
-        setlastStep(false)
         setDayNumber(6)        
         setSelectedDay("SATURDAY")
+        break;
+
+      case "TERMINADO":
+        setlastStep(false)
+        setSelectedDay("SUNDAY")
         break;
     
       default:
@@ -265,6 +318,7 @@ export default function Form() {
         break;
 
       case "SUNDAY":
+        setSelectedDay("TERMINADO")
         setlastStep(true)
         break;
     
@@ -330,6 +384,7 @@ export default function Form() {
         onSubmit={handleFormSubmit} 
         initialValues={initialValues}
         validationSchema={userSchema}
+        enableReinitialize
       >
         {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
@@ -338,6 +393,16 @@ export default function Form() {
               <Card sx={{pb:4, pt:2, px:2, m:2}}>
               <Typography variant="h4" color="green" mb={4}>Datos</Typography>
                 <Box display="grid" gap="30px" gridTemplateColumns="repeat(4, minmax(0,1fr))" sx={{ "& > div": { gridColumn: isNonMobile ? undefined : "span 4"}}}>
+                  <TextField 
+                      fullWidth
+                      variant="filled"
+                      type="text"
+                      label="ID"
+                      value={values.id_persona}
+                      name="id_persona"
+                      sx={{ gridColumn: "span 4", display:"none" }}
+                      disabled
+                  />
                   <TextField 
                       fullWidth
                       variant="filled"
@@ -462,7 +527,7 @@ export default function Form() {
 
             <Box hidden={step !== 2 ? true : false}>
             <Card sx={{pb:2, m:2}}>
-              <DragAndDrop handleServices={handleServices} />
+              <DragAndDrop handleServices={handleServices} servicesSelected={servicesSelected} step={step} />
             </Card>
             </Box>
 
@@ -475,7 +540,6 @@ export default function Form() {
                     sx={{color:"black!important"}}
                     key={item.id} 
                     variant={selectedDay === item.send ? "contained" : "text"}
-                    onClick={() => { setSelectedDay(item.send)} }
                   >
                     {item.name}
                   </Button>
@@ -568,7 +632,7 @@ export default function Form() {
                   </Grid2>
                 </Grid2>
                 
-                <Button sx={{m:2}} disabled={selectedDay === "MONDAY" ? true : false} variant="contained" onClick={undoWorkday}>Deshacer jornada</Button>
+                <Button sx={{m:2}} disabled={workweek.length === 0 ? true : false} variant="contained" onClick={undoWorkday}>Deshacer jornada</Button>
                 <Button disabled={lastStep} sx={{my:2}} variant="contained" onClick={confirmWorkday}>Confirmar jornada</Button>
               </Card>
             </Box>

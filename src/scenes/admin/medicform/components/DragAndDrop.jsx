@@ -18,12 +18,12 @@ const listContainer = {
 }
 
 // styled de mui dice estar deprecado, pero es necesario en este caso para que el drag and drop funcione.
-const DraggableItem = styled(Paper)(({ isDragging }) => ({
+const DraggableItem = styled(Paper)(({ isdragging }) => ({
   padding: "12px",
   margin: "4px 0",
   display: "flex",
   alignItems: "center",
-  backgroundColor: isDragging ? "#e3f2fd" : "#ffffff",
+  backgroundColor: isdragging ? "#e3f2fd" : "#ffffff",
   transition: "background-color 0.2s ease",
   "&:hover": {
     backgroundColor: "#f5f5f5"
@@ -32,19 +32,29 @@ const DraggableItem = styled(Paper)(({ isDragging }) => ({
 
 const route = import.meta.env.VITE_API_ROUTE;
 
-const DragAndDrop = ({ handleServices }) => {
+const DragAndDrop = ({ handleServices, servicesSelected, step }) => {
   const [sourceItems, setSourceItems] = useState([]);
   const [destItems, setDestItems] = useState([]);
   const [sourceSearch, setSourceSearch] = useState("");
   const [destSearch, setDestSearch] = useState("");
 
+  // Trae los servicios medicos solo cuando el paso es 2
   useEffect(() => {
+    if(step !== 2) return
+
+    console.log("activated")
+
     axios
         .get(`${route}/servicio_medico/traer`)
         .then(response => {
-          setSourceItems(response.data)
+          let items = response.data
+
+          // Filtra los servicios que ya estan seleccionados
+          items = items.filter(item => !servicesSelected.find(service => service.codigo_servicio === item.codigo_servicio))
+          setSourceItems(items)
+          setDestItems(servicesSelected)
         })
-  }, [])
+  }, [step])
 
   const handleDragEnd = (result) => {
     if (!result.destination) return;
@@ -124,8 +134,8 @@ const DragAndDrop = ({ handleServices }) => {
                   <DraggableItem
                     ref={provided.innerRef}
                     {...provided.draggableProps}
-                    isDragging={snapshot.isDragging}
-                    elevation={snapshot.isDragging ? 3 : 1}
+                    isdragging={snapshot.isdragging}
+                    elevation={snapshot.isdragging ? 3 : 1}
                   >
                     <Box {...provided.dragHandleProps} sx={{ mr: 2 }}>
                       <MdDragIndicator />

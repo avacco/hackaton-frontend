@@ -37,7 +37,7 @@ const Sidebar = () => {
         break;
 
       case "/system/employees":
-        setSelected("Medicos")
+        setSelected("Médicos")
         break;
 
       case "/system/patients":
@@ -57,7 +57,7 @@ const Sidebar = () => {
         break;
 
       case "/system/form":
-        setSelected("Formulario medicos")
+        setSelected("Formulario médicos")
         break;
 
       case "/system/serviceform":
@@ -65,7 +65,7 @@ const Sidebar = () => {
         break;
 
       case "/system/calendar":
-        setSelected("Turnos")
+        setSelected("Citas")
         break;
 
       case "/system/logout":
@@ -152,7 +152,7 @@ const Sidebar = () => {
             <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Datos</Typography>
 
             <Item title="Administradores" to="/system/administrators" icon={<AdminPanelSettingsOutlined />} selected={selected} />
-            <Item title="Medicos" to="/system/employees" icon={<PeopleOutlineOutlined />} selected={selected} />
+            <Item title="Médicos" to="/system/employees" icon={<PeopleOutlineOutlined />} selected={selected} />
             <Item title="Pacientes" to="/system/patients" icon={<ContactsOutlined />} selected={selected} />
             <Item title="Facturas" to="/system/invoices" icon={<ReceiptOutlined />} selected={selected} />
             <Item title="Servicios" to="/system/services" icon={<MedicalServicesOutlined />} selected={selected} />
@@ -160,9 +160,9 @@ const Sidebar = () => {
             <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Paginas</Typography>
 
             <Item title="Formulario admin" to="/system/adminform/" icon={<SupervisorAccountOutlined />} selected={selected} />
-            <Item title="Formulario medicos" to="/system/form" icon={<PersonOutlineOutlined />} selected={selected} />
+            <Item title="Formulario médicos" to="/system/form" icon={<PersonOutlineOutlined />} selected={selected} />
             <Item title="Formulario servicios" to="/system/serviceform" icon={<ManageAccountsOutlined />} selected={selected} />
-            <Item title="Turnos" to="/system/calendar" icon={<CalendarTodayOutlined />} selected={selected} />
+            <Item title="Citas" to="/system/calendar" icon={<CalendarTodayOutlined />} selected={selected} />
 
             <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Gráficos (WIP)</Typography>
           </Box>

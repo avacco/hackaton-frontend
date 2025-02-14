@@ -80,17 +80,13 @@ export default function ServicesForm() {
                     message: state ? "Servicio editado" : "Servicio creado",
                     severity: "success"
                   });
-                  setLoading(false)
-                
-
             }).catch((error) => {
                 setSnackbar({
                   open: true,
                   message: "Error al intentar crear servicio.",
                   severity: "error"
                 });
-                setLoading(false)
-            })
+            }).finally(setLoading(false))
   };
 
   return (
