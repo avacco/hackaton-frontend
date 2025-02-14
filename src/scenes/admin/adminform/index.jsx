@@ -1,11 +1,13 @@
-import { Alert, Box, Button, Card, CircularProgress, Snackbar, TextField, Typography } from "@mui/material"
+import { Alert, Box, Button, Card, CircularProgress, IconButton, InputAdornment, Snackbar, TextField, Typography } from "@mui/material"
 import { Formik } from "formik"
 import * as yup from "yup"
 import Header from "../../../components/Header"
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAuth } from "../../../provider/AuthProvider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
+import { LockOutlined, VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
 
 export default function AdminForm() {
   const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -14,18 +16,19 @@ export default function AdminForm() {
   const route = import.meta.env.VITE_API_ROUTE;
  
   // Valores iniciales para campos de formulario
-  const initialValues = {
-    nombre: "Andres",
-    apellido: "Vargas",
-    dni: "192538904",
-    fechaNac: "1996-12-24",
-    email: "fakeanon32123@gmail.com",
-    telefono: "987167562",
-    direccion: "Costanera del Estrecho 2729",
-    username: "avargas",
-    password: "andres12",
-    rol: "admin",
-  };
+  const [initialValues, setInitialValues] = useState({
+    id_persona: "",
+    nombre: "",
+    apellido: "",
+    dni: "",
+    fechaNac: "",
+    email: "",
+    telefono: "",
+    direccion: "",
+    username: "",
+    password: "",
+    rol: "",
+  });
 
   // Define la logica de validacion para los campos
   const userSchema = yup.object().shape({
@@ -37,11 +40,12 @@ export default function AdminForm() {
     telefono: yup.string().required("Requerido"),
     direccion: yup.string().required("Requerido"),
     username: yup.string().required("Requerido"),
-    password: yup.string("").required("Requerido"),
+    password: yup.string().required("Requerido"),
     rol: yup.string().required("Requerido"),
   })
 
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
   // Popups para exito y fracaso en login
   const [snackbar, setSnackbar] = useState(
@@ -51,6 +55,39 @@ export default function AdminForm() {
       severity: "success"
     }
   );
+
+
+  const { state } = useLocation();
+
+  useEffect(() => {
+    if(state) {
+      axios
+        .get(`${route}/personal/traer/${state}`,
+          { headers: { Authorization: "Bearer "+token }
+        },)
+        .then(response => {
+
+          const data = response.data;
+
+          setInitialValues({
+            id_persona: data.id_persona,
+            nombre: data.nombre,
+            apellido: data.apellido,
+            dni: data.dni,
+            fechaNac: data.fechaNac,
+            email: data.email,
+            telefono: data.telefono,
+            direccion: data.direccion,
+            username: data.username,
+            password: "", // No se debe enviar la contraseña
+            rol: data.rol,
+          })
+        },
+      )
+    }
+  }, [state])
+  
+
 
 
   const handleFormSubmit = async (values) => {
@@ -63,7 +100,7 @@ export default function AdminForm() {
               .then((response) => {
                   setSnackbar({
                     open: true,
-                    message: "Personal administrativo añadido",
+                    message: state ? "Personal editado" : "Peronal administrativo creado",
                     severity: "success"
                   });
                   setLoading(false)
@@ -88,11 +125,22 @@ export default function AdminForm() {
         onSubmit={handleFormSubmit} 
         initialValues={initialValues}
         validationSchema={userSchema}
+        enableReinitialize
       >
         {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
                                           {/* Con este pedazo de codigo puedo usar span 1-4 para dividir en cuatro columnas el espacio de la caja. */}
             <Box display="grid" gap="30px" gridTemplateColumns="repeat(4, minmax(0,1fr))" sx={{ "& > div": { gridColumn: isNonMobile ? undefined : "span 4"}}}>
+            <TextField 
+                fullWidth
+                variant="filled"
+                type="text"
+                label="ID"
+                value={values.id_persona}
+                name="id_persona"
+                sx={{ gridColumn: "span 4", display:"none" }}
+                disabled
+             />
             <TextField 
                 fullWidth
                 variant="filled"
@@ -195,13 +243,13 @@ export default function AdminForm() {
                 name="username"
                 error={!!touched.username && !!errors.username} 
                 helperText={touched.username && errors.username}
-                sx={{ gridColumn: "span 4" }}
+                sx={{ gridColumn: "span 2" }}
              />
 
              <TextField 
                 fullWidth
                 variant="filled"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 label="Contraseña"
                 onBlur={handleBlur}
                 onChange={handleChange}
@@ -209,7 +257,21 @@ export default function AdminForm() {
                 name="password"
                 error={!!touched.password && !!errors.password} 
                 helperText={touched.password && errors.password}
-                sx={{ gridColumn: "span 4" }}
+                sx={{ gridColumn: "span 2" }}
+                slotProps={{
+                  input: {
+                    endAdornment: 
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                }}
+              
              />
               <TextField 
                 fullWidth

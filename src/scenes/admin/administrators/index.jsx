@@ -6,11 +6,14 @@ import { DeleteOutlineOutlined, EditOutlined } from "@mui/icons-material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../provider/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 export default function Administrators() {
 
   const [responsedata, setresponsedata] = useState()
   const { token } = useAuth();
+
+  const navigate = useNavigate();
   
   // Popups
   const [snackbar, setSnackbar] = useState(
@@ -39,6 +42,27 @@ export default function Administrators() {
           });
         })
   }, [])
+
+  const handleDelete = async (id) => {
+    await axios
+      .delete(`${route}/personal/borrar/${id}`, {
+        headers: { Authorization: "Bearer "+token }})
+        .then(response => {
+          setSnackbar({
+            open: true,
+            message: "Personal eliminado",
+            severity: "success"
+          });
+          setresponsedata(responsedata.filter((row) => row.id_persona !== id))
+        })
+      .catch((error) => {
+        setSnackbar({
+          open: true,
+          message: "Error al eliminar",
+          severity: "error"
+        });
+      })
+  }
   
   
   // Control de columnas, el field corresponde al nombre de dato al que correspondera la columna
@@ -98,11 +122,11 @@ export default function Administrators() {
       field: "actions", 
       headerName: "Acciones", 
       flex: 1, 
-      renderCell: () => { 
+      renderCell: ({ row: { id_persona }}) => { 
         return ( 
           <Stack direction="row" spacing={1} mt="15px">
-            <Button variant="outlined" color="warning" size="small" ><EditOutlined/> </Button>
-            <Button variant="outlined" color="error"  size="small"><DeleteOutlineOutlined/> </Button>
+            <Button variant="outlined" color="warning" size="small" onClick={ ()=> navigate("/system/adminform", { state: id_persona})} ><EditOutlined/> </Button>
+            <Button variant="outlined" color="error"  size="small" onClick={ () => handleDelete(id_persona) }><DeleteOutlineOutlined/> </Button>
           </Stack>
         ) 
       },

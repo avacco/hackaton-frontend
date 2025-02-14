@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, Fade, Modal, Backdrop, Collapse } from "@mui/material";
+import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, Fade, Modal, Backdrop, Collapse, FormControlLabel, Checkbox } from "@mui/material";
 import { BsTelephone, BsEnvelope, BsClock, BsGeoAlt } from "react-icons/bs";
 import { Footer } from "../../../components/Footer";
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
@@ -20,9 +20,13 @@ const Consultation = () => {
   // Reservado para dias colmados
   const [blockedDates, setBlockedDates] = useState([dayjs("2025-03-03"), dayjs("2025-03-05")])
 
-  // Define los dias de la semana que el medico puede atender
+  // Define los dias de la semana y el horario en que el medico puede atender
   const [allowedDays, setAllowedDays] = useState([])
-
+  const [timeBlocks, setTimeBlocks] = useState(["00:00"])
+  const [startHour, setstartHour] = useState(dayjs())
+  const [finishHour, setfinishHour] = useState(dayjs())
+  const [missingBlocks, setMissingBlocks] = useState([])
+  
   // Define las fechas que estaran habilitadas. 
   const shouldDisableDate = useMemo(() => (date) => {
     const currentDate = dayjs(date);
@@ -64,9 +68,11 @@ const Consultation = () => {
   // Contenedores de responses
   const [services, setServices] = useState([])
   const [docs, setDocs] = useState([])
+  const [idService, setIdService] = useState("")
 
   const route = import.meta.env.VITE_API_ROUTE;
 
+  // Trae los servicios medicos disponibles
   useEffect(() => {
     axios
         .get(`${route}/servicio_medico/traer`)
@@ -80,24 +86,65 @@ const Consultation = () => {
 
   // Se mantiene atento por si cambia el doctor objetivo, recorre la lista de turnos del doctor y setea los adecuados para seleccionarlos en el calendario
   useEffect(() => {
-    
     if(targetDoc.listaTurno !== undefined){
-      
       let allowDay = []
-
       targetDoc.listaTurno.forEach((turn) => (
           turn.descanso ? null : allowDay.push(turn.numeroDia)
       ))
-
       setAllowedDays(allowDay)
     }
-
   }, [targetDoc])
+
+  // Se mantiene atento por si cambia el array de bloques de tiempo, verifica si hay bloques faltantes
+  useEffect(() => { checkTimes() }, [timeBlocks])
+
+
+  // Desactiva bloques de tiempo especificos
+  const shouldDisableTime = (value) => {
+
+    const hour = value.hour();
+    const minute = value.minute();
+    
+    // Horas de inicio y fin de operaciones en clinica, bloques fuera de este rango son desactivados
+    if (hour < 8) return true;
+    if (hour > 19) return true;
+
+    // Verifica el array de bloques faltantes, retorna true si el bloque esta en la lista
+    if (missingBlocks.includes(`${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`)) return true;
+        
+    return false;
+  };
+
+  // Verifica los valores faltantes en el array de bloques de tiempo
+  const checkTimes = () => {
+
+    // Crear un array con todos los valores de tiempo posibles entre inicio y termino
+    let allTimes = [];
+    for (let h = startHour.hour(); h <= finishHour.hour(); h++) {
+      for (let m = 0; m < 60; m += 30) {
+        if (h === startHour.hour() && m < startHour.minute()) continue; // Saltar los bloques antes de inicio
+        if (h === finishHour.hour() && m > finishHour.minute()) break; // Saltar los bloques después de final
+        let hh = h.toString().padStart(2, "0");
+        let mm = m.toString().padStart(2, "0");
+        allTimes.push(`${hh}:${mm}`);
+      }
+    }
+
+    // Encuentra los valores faltantes y los setea en el estado
+    let missingTimes = allTimes.filter(time => !timeBlocks.includes(time));
+    setMissingBlocks(missingTimes);
+
+    console.log("Valores faltantes:", missingTimes);
+
+  }
   
   
   const checkServices = () => {
 
-    console.log("check: ")
+    targetDoc.listaTurno.forEach((turn) => (
+      turn.numeroDia === targetDay.day() ? console.log(turn) : null
+    ))
+
   }
 
    // Control de primer paso (Seleccion de servicio)
@@ -108,6 +155,7 @@ const Consultation = () => {
         .get(`${route}/medico/servicio_con_medicos/${e.target.value}`)
         .then(response => {
           setDocs(response.data.nombresMedicos);
+          setIdService(response.data.id_servicio);
         })
         .catch((error) => {
           console.log(error);
@@ -137,13 +185,15 @@ const Consultation = () => {
   }
 
   // Control de tercer paso (Seleccion de fecha)
-  // Muestra en consola la fecha seleccionada. Esto sera usado para enviar por api mas adelante.
   const handleDateSelection = (newDate) => {
     setTargetDay(newDate);
     setHourCard(true);
     setTargetHour(dayjs());
-    console.log(`Fecha seleccionada: ${newDate.format("DD/MM/YYYY")}`); 
-    
+
+    // Verificar si el dia seleccionado esta en la lista de dias disponibles, si lo esta, setea las horas disponibles, hora de inicio y hora de termino.
+    targetDoc.listaTurno.forEach((turn) => (
+      turn.numeroDia === newDate.day() ? (setstartHour(dayjs(turn.horaInicio, "HH:mm")), setfinishHour(dayjs(turn.horaFinal, "HH:mm")), setTimeBlocks(turn.horaBloque)) : null
+    ))
     
   };
 
@@ -151,11 +201,10 @@ const Consultation = () => {
   // Muestra en consola la hora seleccionada Esto sera usado para enviar por api mas adelante.
   const handleHourSelection = (newHour) => {
     setTargetHour(newHour);
-    console.log(`Hora seleccionada: ${newHour.format("HH:mm")}`); 
     handleOpen();
   };
 
-  // Control de quinto paso
+  // Control de quinto paso (Asignacion de paciente)
 
   const handlePatientFetch = async (values) => {
     if (loading) return;
@@ -164,82 +213,138 @@ const Consultation = () => {
     console.log(values.fetchdni);
     setLoading(true);
 
-    try {
+      axios
+        .get(`${route}/paciente/buscar/${values.fetchdni}`)
+        .then(response => {
 
-      // throw new Error;
+          setSnackbar({
+            open: true,
+            message: "Paciente ha sido registrado antes",
+            severity: "success"
+          });
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setSnackbar({
-        open: true,
-        message: "Paciente ha sido registrado antes",
-        severity: "success"
-      });
-      // saltarse el sexto paso e ir directo al septimo
-
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: "Paciente no registrado, por favor rellene el formulario",
-        severity: "info"
-      });
-
-      setPatientId(values.fetchdni);
-      
-    } finally {
-      setLoading(false);
-    }
+          if(response.data.length === 0){
+         
+            setSnackbar({
+              open: true,
+              message: "Paciente no encontrado. Por favor, rellene el formulario",
+              severity: "info"
+            });
+          } else {
+            setPatientId(response.data.id_persona);
+            // saltarse el sexto paso e ir directo al septimo
+            
+          }
+        })
+        .catch((error) => {
+          setSnackbar({
+            open: true,
+            message: "Error al traer paciente",
+            severity: "error"
+          });
+        })
+        .finally(setLoading(false))
 
   }
 
-  // Control de sexto paso opcional
+  // Control de sexto paso opcional (Creacion de paciente si no existe (y asignacion))
   const handleFormSubmit = async (values) => {
     if (loading) return;
 
     setLoading(true);
-    try {
+    
+    axios
+      .post(`${route}/paciente/crear`, values)
+      .then(response => {
+        setSnackbar({
+          open: true,
+          message: "Paciente ha sido registrado",
+          severity: "success"
+        });
+        setPatientId(response.data.id_persona);
 
-      await new Promise(resolve => setTimeout(resolve, 1500)); 
-      setSnackbar({
-        open: true,
-        message: "exito.",
-        severity: "success"
-      });
-      
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: "Ha ocurrido un error.",
-        severity: "error"
-      });
-    } finally {
-      setLoading(false);
-    }
+      })
+      .catch((error) => {
+        setSnackbar({
+          open: true,
+          message: "Error al crear paciente",
+          severity: "error"
+        });
+      })
+      .finally(setLoading(false))
+
   };
+
+  // Control de septimo paso (Creacion de consulta)
+  const handleConsultationSubmit = async () => {
+    if (loading) return;
+
+    setLoading(true);
+    
+    let data = {
+      "fechaConsulta": targetDay.format("YYYY-MM-DD"),
+      "horaTurno": targetHour.format("HH:mm"),
+      "turno": { "id_turno": 1 }, 
+      "pagadoONo": "NO",
+      "paciente": { "id_persona": patientId },
+      "medico": { "id_persona": targetDoc.id_persona },
+      "servicio": { "codigo_servicio": idService }
+    }
+
+    axios
+      .post(`${route}/consulta/crear`, data)
+      .then(response => {
+        setSnackbar({
+          open: true,
+          message: "Consulta ha sido registrada",
+          severity: "success"
+        });
+
+        // Limpia los valores para permitir una nueva consulta
+        setTargetService("");
+        setTargetDoc("");
+        setTargetDay(dayjs());
+        setTargetHour(dayjs());
+        setPatientId(null);
+
+      })
+      .catch((error) => {
+        setSnackbar({
+          open: true,
+          message: "Error al crear consulta",
+          severity: "error"
+        });
+      })
+      .finally(setLoading(false))
+  }
 
 
   // Valores para formulario
-  // TODO: Terminar formulario de paciente
   const initialValues = {
-    firstName: "Andres",
-    lastName: "Vargas",
+    nombre: "Andres",
+    apellido: "Vargas",
+    dni: "123123123",
+    fechaNac: "1996-12-24",
     email: "correo@correo.com",
-    phone: "56912123434",
-    reason: "Otro",
-    message: "Prueba de formulario",
+    telefono: "56912123434",
+    direccion: "Casa",
+    obraSocial: false,
   }
 
   const fetchInitialValues = {
-    fetchdni: "123456789",
+    fetchdni: "123123123",
   }
   
   // Esquema de validacion de yup
   const formSchema = yup.object().shape({
-    firstName: yup.string().required("Requerido"),
-    lastName: yup.string().required("Requerido"),
+    nombre: yup.string().required("Requerido"),
+    apellido: yup.string().required("Requerido"),
+    dni: yup.string().required("Requerido"),
+    fechaNacl: yup.date().required("Requerido"),
     email: yup.string().email("Correo inválido").required("Requerido"),
-    phone: yup.number().required("Requerido"),
-    reason: yup.string().required("Requerido"),
-    message: yup.string().required("Requerido")
+    telefono: yup.number().required("Requerido"),
+    direccion: yup.string().required("Requerido"),
+    obraSocial: yup.boolean().required("Requerido"),
   })
 
   // Styles para Box de cards
@@ -365,8 +470,7 @@ const Consultation = () => {
                     defaultValue={dayjs('2025-02-12T08:00')} 
                     ampm={false} 
                     onChange={handleHourSelection} 
-                    minTime={dayjs().hour(7)}
-                    maxTime={dayjs().hour(20).minute(0)}
+                    shouldDisableTime={shouldDisableTime}
                   />
                 </LocalizationProvider>
                 </Box>
@@ -436,11 +540,11 @@ const Consultation = () => {
                             <TextField
                               fullWidth
                               label="Nombre"
-                              name="firstName"
-                              value={values.firstName}
+                              name="nombre"
+                              value={values.nombre}
                               onChange={handleChange}
-                              error={!!touched.firstName && !!errors.firstName}
-                              helperText={touched.firstName && errors.firstName}
+                              error={!!touched.nombre && !!errors.nombre}
+                              helperText={touched.nombre && errors.nombre}
                               required
                             />
                           </Grid2>
@@ -448,11 +552,11 @@ const Consultation = () => {
                             <TextField
                               fullWidth
                               label="Apellido"
-                              name="lastName"
-                              value={values.lastName}
+                              name="apellido"
+                              value={values.apellido}
                               onChange={handleChange}
-                              error={!!touched.lastName && !!errors.lastName}
-                              helperText={touched.lastName && errors.lastName}
+                              error={!!touched.apellido && !!errors.apellido}
+                              helperText={touched.apellido && errors.apellido}
                               required
                             />
                           </Grid2>
@@ -468,42 +572,53 @@ const Consultation = () => {
                               helperText={touched.email && errors.email}
                               required
                             />
+
+                            <TextField
+                              fullWidth
+                              label="DNI o Cédula"
+                              name="dni"
+                              type="dni"
+                              value={values.dni}
+                              onChange={handleChange}
+                              error={!!touched.dni && !!errors.dni}
+                              helperText={touched.dni && errors.dni}
+                              required
+                            />
+
+                            <TextField 
+                              fullWidth
+                              label="Fecha de nacimiento"
+                              name="fechaNac"
+                              type="date"
+                              value={values.fechaNac}
+                              onChange={handleChange}
+                              error={!!touched.fechaNac && !!errors.fechaNac}
+                              helperText={touched.fechaNac && errors.fechaNac}
+                            />
                           
                             <TextField
                               fullWidth
                               label="Número de contacto"
-                              name="phone"
-                              value={values.phone}
+                              name="telefono"
+                              value={values.telefono}
                               onChange={handleChange}
-                              error={!!touched.phone && !!errors.phone}
-                              helperText={touched.phone && errors.phone}
+                              error={!!touched.telefono && !!errors.telefono}
+                              helperText={touched.telefono && errors.telefono}
                             />
-                          
-                            <FormControl fullWidth required error={!!errors.reason}>
-                              <InputLabel>Motivo por el contacto</InputLabel>
-                              <Select
-                                name="reason"
-                                value={values.reason}
-                                onChange={handleChange}
-                                label="Motivo por el contacto"
-                              >
-                                <MenuItem value="Consulta general">Consulta general</MenuItem>
-                                <MenuItem value="Sugerencias">Sugerencias</MenuItem>
-                                <MenuItem value="Reclamos">Reclamos</MenuItem>
-                                <MenuItem value="Otro">Otro</MenuItem>
-                              </Select>
-                            </FormControl>
                           
                             <TextField
                               fullWidth
-                              multiline
-                              rows={4}
-                              label="Mensaje"
-                              name="message"
-                              value={values.message}
+                              label="Dirección"
+                              name="direccion"
+                              value={values.direccion}
                               onChange={handleChange}
-                              placeholder="Detalle el motivo de contacto..."
+                              error={!!touched.direccion && !!errors.direccion}
+                              helperText={touched.direccion && errors.direccion}
                             />
+
+                            <Box>
+                              <FormControlLabel sx={{ml:3}} control={<Checkbox checked={values.obraSocial} />} label="¿Obra social?" />
+                            </Box>
                           
                             <Button
                               type="submit"
@@ -522,7 +637,7 @@ const Consultation = () => {
                   ) : (
                   <>
                   <Typography align='center' variant="h4" gutterBottom>
-                      Resultados
+                      Ingrese el DNI o Cédula del paciente
                     </Typography>
                     <Formik
                         onSubmit={handlePatientFetch}
@@ -537,7 +652,7 @@ const Consultation = () => {
                             name="fetchdni"
                             value={values.fetchdni}
                             onChange={handleChange}
-                            placeholder="Cédula o DNI"
+                            placeholder="DNI o Cédula"
                           />
                           <Button
                               type="submit"
