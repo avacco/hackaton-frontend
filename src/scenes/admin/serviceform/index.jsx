@@ -4,9 +4,10 @@ import * as yup from "yup"
 import Header from "../../../components/Header"
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAuth } from "../../../provider/AuthProvider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { AttachMoney, AttachMoneyOutlined } from "@mui/icons-material";
+import { AttachMoneyOutlined } from "@mui/icons-material";
+import { useLocation } from "react-router-dom";
 
 export default function ServicesForm() {
   const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -15,12 +16,16 @@ export default function ServicesForm() {
   const route = import.meta.env.VITE_API_ROUTE;
  
   // Valores iniciales para campos de formulario
-  const initialValues = {
-    nombre: "",
-    descripcion: "",
-    precio: "",
-    duracion: "",
-  };
+
+  const [initialValues, setInitialValues] = useState(
+    {
+      codigo_servicio: "",
+      nombre: "",
+      descripcion: "",
+      precio: "",
+      duracion: "",
+    }
+  ) 
 
   // Define la logica de validacion para los campos
   const serviceSchema = yup.object().shape({
@@ -41,6 +46,26 @@ export default function ServicesForm() {
     }
   );
 
+  // Presionar en editar en la tabla de servicios redirige aqui y trae consigo el ID del servicio a editar.
+  // Si existe un ID, se carga la informacion del servicio en el formulario.
+  const { state } = useLocation();
+
+  useEffect(() => {
+    if(state) {
+
+      axios
+        .get(`${route}/servicio_medico/traer/${state}`,{
+           headers: { Authorization: "Bearer "+token }
+          },)
+        .then(response => {
+          setInitialValues(response.data)
+        },
+      )
+
+    }
+  }, [state])
+  
+
 
   const handleFormSubmit = async (values) => {
     setLoading(true)
@@ -52,7 +77,7 @@ export default function ServicesForm() {
               .then((response) => {
                   setSnackbar({
                     open: true,
-                    message: "Servicio creado",
+                    message: state ? "Servicio editado" : "Servicio creado",
                     severity: "success"
                   });
                   setLoading(false)
@@ -77,11 +102,22 @@ export default function ServicesForm() {
         onSubmit={handleFormSubmit} 
         initialValues={initialValues}
         validationSchema={serviceSchema}
+        enableReinitialize
       >
         {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
                                           {/* Con este pedazo de codigo puedo usar span 1-4 para dividir en cuatro columnas el espacio de la caja. */}
             <Box display="grid" gap="30px" gridTemplateColumns="repeat(4, minmax(0,1fr))" sx={{ "& > div": { gridColumn: isNonMobile ? undefined : "span 4"}}}>
+            <TextField 
+                fullWidth
+                variant="filled"
+                type="text"
+                label="ID"
+                value={values.codigo_servicio}
+                name="codigo_servicio"
+                sx={{ gridColumn: "span 4", display:"none" }}
+                disabled
+             />
             <TextField 
                 fullWidth
                 variant="filled"
@@ -139,7 +175,7 @@ export default function ServicesForm() {
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.duracion}
-                placeholder="Duracion en horas:minutos (ejemplo: 2:30)"
+                placeholder="Duracion en horas:minutos (ejemplo: 02:30)"
                 name="duracion"
                 error={!!touched.duracion && !!errors.duracion} 
                 helperText={touched.duracion && errors.duracion}

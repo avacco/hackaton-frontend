@@ -21,7 +21,8 @@ import { theme } from './theme'
 import SystemWrapper from './scenes/admin';
 import PageWrapper from './scenes/client';
 import Calendar from './scenes/admin/calendar';
-import ServicesForm from './scenes/admin/servicesform';
+import ServicesForm from './scenes/admin/serviceform';
+import Services from './scenes/admin/services';
 
 function App() {
 
@@ -57,10 +58,12 @@ function App() {
                 <Route path="/system/employees" element={<Employees />} />
                 <Route path="/system/patients" element={<Patients />} />
                 <Route path="/system/invoices" element={<Invoices />} />
+                <Route path="/system/services" element={<Services />} />
                 <Route path="/system/adminform" element={<AdminForm />} />
                 <Route path="/system/form" element={<Form />} />
                 <Route path="/system/serviceform" element={<ServicesForm />} />
                 <Route path="/system/calendar" element={<Calendar />} />
+                <Route path="/system/logout" element={<Dashboard />} />
               </Route>
                             
               <Route path='*' element={<NotFound />} />

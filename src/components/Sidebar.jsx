@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 import { ProSidebar, Menu, MenuItem } from 'react-pro-sidebar'
 import { Box, IconButton, Typography } from '@mui/material'
-import { Link, useNavigate } from 'react-router-dom'
-import { HomeOutlined, PeopleOutlineOutlined, ContactsOutlined, ReceiptOutlined, PersonOutlineOutlined, CalendarTodayOutlined, PieChartOutlineOutlined, TimelineOutlined, BarChartOutlined, MenuOutlined, MapOutlined, SupervisorAccountOutlined, AdminPanelSettingsOutlined, LogoutOutlined, ManageAccountsOutlined } from '@mui/icons-material'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { HomeOutlined, PeopleOutlineOutlined, ContactsOutlined, ReceiptOutlined, PersonOutlineOutlined, CalendarTodayOutlined, MenuOutlined, SupervisorAccountOutlined, AdminPanelSettingsOutlined, LogoutOutlined, ManageAccountsOutlined, MedicalServicesOutlined } from '@mui/icons-material'
 import 'react-pro-sidebar/dist/css/styles.css';
 import { useAuth } from '../provider/AuthProvider'
 import axios from 'axios'
 
 // Mini componente para los items del menu.
-const Item = ({ title, to, icon, selected, setSelected }) => {
+const Item = ({ title, to, icon, selected }) => {
   return (
-    <MenuItem active={selected === title} style={{ color: "gray" }} onClick={() => setSelected(title)} icon={icon}>
+    <MenuItem active={selected === title} style={{ color: "black" }} icon={icon}>
       <Typography>{title}</Typography>
       <Link to={to} />
     </MenuItem>
@@ -21,11 +21,64 @@ const Sidebar = () => {
 
   const [responsedata, setresponsedata] = useState()
   const { token } = useAuth();
-  const { setToken } = useAuth();
   const route = import.meta.env.VITE_API_ROUTE;
-  
-  useEffect(() => {
 
+  const location = useLocation();
+  
+  // Cambia el item seleccionado en el sidebar dependiendo de la ruta actual.
+  useEffect(() => {
+    switch (location.pathname) {
+      case "/system/dashboard":
+        setSelected("Dashboard")
+        break;
+      
+      case "/system/administrators":
+        setSelected("Administradores")
+        break;
+
+      case "/system/employees":
+        setSelected("Medicos")
+        break;
+
+      case "/system/patients":
+        setSelected("Pacientes")
+        break;
+
+      case "/system/invoices":
+        setSelected("Facturas")
+        break;
+        
+      case "/system/services":
+        setSelected("Servicios")
+        break;
+
+      case "/system/adminform/":
+        setSelected("Formulario admin")
+        break;
+
+      case "/system/form":
+        setSelected("Formulario medicos")
+        break;
+
+      case "/system/serviceform":
+        setSelected("Formulario servicios")
+        break;
+
+      case "/system/calendar":
+        setSelected("Turnos")
+        break;
+
+      case "/system/logout":
+        handleLogout()
+        break;
+
+      default:
+        break;
+    }
+  }, [location])
+  
+
+  useEffect(() => {
     axios
         .get(`${route}/user/user`,{
           headers: { Authorization: "Bearer "+token }
@@ -34,8 +87,8 @@ const Sidebar = () => {
           setresponsedata(response.data)   
         })
         .catch((error) => { 
-          if(error.response.status === 401)
-            setToken();
+            localStorage.removeItem('auth_token')
+            navigate("/login");
         })
   }, [])
 
@@ -93,24 +146,25 @@ const Sidebar = () => {
           )}
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}> 
-            <Item title="Salir" to="/system/dashboard" icon={<LogoutOutlined />} selected={false} setSelected={handleLogout}/>
-            <Item title="Dashboard" to="/system/dashboard" icon={<HomeOutlined />} selected={selected} setSelected={setSelected}/>
+            <Item title="Salir" to="/system/logout" icon={<LogoutOutlined />} selected={false} />
+            <Item title="Dashboard" to="/system/dashboard" icon={<HomeOutlined />} selected={selected} />
 
-            <Typography variant='h6' color="black" sx={{ m: "15px 0 5px 20px"}}>Datos</Typography>
+            <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Datos</Typography>
 
-            <Item title="Administradores" to="/system/administrators" icon={<AdminPanelSettingsOutlined />} selected={selected} setSelected={setSelected}/>
-            <Item title="Medicos" to="/system/employees" icon={<PeopleOutlineOutlined />} selected={selected} setSelected={setSelected}/>
-            <Item title="Pacientes" to="/system/patients" icon={<ContactsOutlined />} selected={selected} setSelected={setSelected}/>
-            <Item title="Facturas" to="/system/invoices" icon={<ReceiptOutlined />} selected={selected} setSelected={setSelected}/>
+            <Item title="Administradores" to="/system/administrators" icon={<AdminPanelSettingsOutlined />} selected={selected} />
+            <Item title="Medicos" to="/system/employees" icon={<PeopleOutlineOutlined />} selected={selected} />
+            <Item title="Pacientes" to="/system/patients" icon={<ContactsOutlined />} selected={selected} />
+            <Item title="Facturas" to="/system/invoices" icon={<ReceiptOutlined />} selected={selected} />
+            <Item title="Servicios" to="/system/services" icon={<MedicalServicesOutlined />} selected={selected} />
 
-            <Typography variant='h6' color="black" sx={{ m: "15px 0 5px 20px"}}>Paginas</Typography>
+            <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Paginas</Typography>
 
-            <Item title="Formulario admin" to="/system/adminform/" icon={<SupervisorAccountOutlined />} selected={selected} setSelected={setSelected}/>
-            <Item title="Formulario medicos" to="/system/form" icon={<PersonOutlineOutlined />} selected={selected} setSelected={setSelected}/>
-            <Item title="Formulario servicios" to="/system/serviceform" icon={<ManageAccountsOutlined />} selected={selected} setSelected={setSelected}/>
-            <Item title="Turnos" to="/system/calendar" icon={<CalendarTodayOutlined />} selected={selected} setSelected={setSelected}/>
+            <Item title="Formulario admin" to="/system/adminform/" icon={<SupervisorAccountOutlined />} selected={selected} />
+            <Item title="Formulario medicos" to="/system/form" icon={<PersonOutlineOutlined />} selected={selected} />
+            <Item title="Formulario servicios" to="/system/serviceform" icon={<ManageAccountsOutlined />} selected={selected} />
+            <Item title="Turnos" to="/system/calendar" icon={<CalendarTodayOutlined />} selected={selected} />
 
-            <Typography variant='h6' color="black" sx={{ m: "15px 0 5px 20px"}}>Gráficos (WIP)</Typography>
+            <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Gráficos (WIP)</Typography>
           </Box>
         </Menu>
       </ProSidebar>
