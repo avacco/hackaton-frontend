@@ -17,8 +17,8 @@ const LoginForm = () => {
   })
 
   const initialValues = {    
-    username: "carlitos92",
-    password: "segura123",
+    username: "",
+    password: "",
   };
 
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ const LoginForm = () => {
     setLoading(true)
 
     await axios
-              .post(`${route}/personal/login`, {headers: { referrerPolicy: "unsafe-url" }} , values)
+              .post(`${route}/personal/login`, values)
               .then((response) => {
                   setToken(response.data);
                   setSnackbar({
