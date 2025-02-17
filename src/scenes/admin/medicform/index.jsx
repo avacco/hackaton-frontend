@@ -294,13 +294,13 @@ export default function Form() {
                 </Box>
               </Card>
             </Box>
-
+        {/* SECCION DRAG AND DROP */}
             <Box hidden={step !== 2 ? true : false}>
             <Card sx={{pb:2, m:2}}>
               <DragAndDrop handleServices={handleServices} servicesSelected={servicesSelected} step={step} />
             </Card>
             </Box>
-
+        {/* SECCION DE HORARIO */}
             <Box hidden={step !== 3 ? true : false}>
               <WorkDaySetter 
                 setWorkweek={setWorkweek}
@@ -310,20 +310,19 @@ export default function Form() {
                 state={state}
               />
             </Box>
-            
+        {/* BOTONES DE NAVEGACION */}
             <Box display="flex" justifyContent="end" mt="20px">
               <Button disabled={step === 1 ? true : false} onClick={() => setStep(step-1)} type="button" color="primary" variant="contained">
               Atras
               </Button>
-              <Button onClick={()=> console.log(workweek)}>
-                check
-              </Button>
               <Button disabled={step === 3 ? true : false} onClick={() => setStep(step+1)} type="button" color="primary" variant="contained">
               Siguiente
               </Button>
+        {/* BOTON SUBMIT */}
               <Button sx={{ml:2}} disabled={lastStep ? false : true} type="submit" color="secondary" variant="contained">
                 {loading ? <CircularProgress size={24} color="inherit" /> : "Añadir medico"}
               </Button>
+
             </Box>
           </form>
         )}

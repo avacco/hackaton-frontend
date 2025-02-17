@@ -56,7 +56,7 @@ const Information = () => {
 
     // Items de informacion con su icono y titulo.
       const information = [
-        { title: "Informes y turnos", icon: <FaCalendarCheck /> },
+//      { title: "Informes y turnos", icon: <FaCalendarCheck /> },
         { title: "Indicaciones para cirugía", icon: <FaPrescription /> },
         { title: "Normas de internación", icon: <FaBed /> },
         { title: "Preguntas frecuentes", icon: <FaQuestion /> },
