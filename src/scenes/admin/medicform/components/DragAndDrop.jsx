@@ -41,9 +41,6 @@ const DragAndDrop = ({ handleServices, servicesSelected, step }) => {
   // Trae los servicios medicos solo cuando el paso es 2
   useEffect(() => {
     if(step !== 2) return
-
-    console.log("activated")
-
     axios
         .get(`${route}/servicio_medico/traer`)
         .then(response => {

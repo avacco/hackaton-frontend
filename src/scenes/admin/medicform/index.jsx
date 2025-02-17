@@ -7,10 +7,8 @@ import { useAuth } from "../../../provider/AuthProvider";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DragAndDrop from "./components/DragAndDrop";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DigitalClock, LocalizationProvider } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
 import { useLocation } from "react-router-dom";
+import WorkDaySetter from "./components/WorkDaySetter";
 
 export default function Form() {
   const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -31,34 +29,14 @@ export default function Form() {
     especialidadMedica: "",
   });
 
-  // Para una iteracion mas adelante. Name es el nombre para los botones y send es lo que sera enviado
-  const daysOfWeek = [
+  // Popups
+  const [snackbar, setSnackbar] = useState(
     {
-      id: 0, name: "Lunes", send: "MONDAY"
-    },
-    {
-      id: 1, name: "Martes", send: "TUESDAY"
-    },
-    {
-      id: 2, name: "Miércoles", send: "WEDNESDAY"
-    },
-    {
-      id: 3, name: "Jueves", send: "THURSDAY"
-    },
-    {
-      id: 4, name: "Viernes", send: "FRIDAY"
-    },
-    {
-      id: 5, name: "Sabado", send: "SATURDAY"
-    },
-    {
-      id: 6, name: "Domingo", send: "SUNDAY"
-    },
-    {
-      id: 6, name: "Terminado", send: "TERMINADO"
-    },
-  ]
-
+      open: false,
+      message: "",
+      severity: "success"
+    }
+  );
 
   // Define la logica de validacion para los campos
   const userSchema = yup.object().shape({
@@ -72,6 +50,18 @@ export default function Form() {
     sueldo: yup.number("").required("Debe ser un valor numerico"),
     especialidadMedica: yup.string().required("Requerido"),
   })
+
+  // Pasos del formulario. Ocultan una parte de este segun su paso.
+  const [step, setStep] = useState(1)
+
+  // Para guardar la semana laboral
+  const [workweek, setWorkweek] = useState([])
+
+  const [servicesSelected, setServicesSelected] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  // Para activar o desactivar el boton de creación de medico.
+  const [lastStep, setlastStep] = useState(false)
 
   
   // Presionar en editar en la tabla de medicos redirige aqui y trae consigo el ID del medico a editar.
@@ -107,238 +97,20 @@ export default function Form() {
 
           setWorkweek(response.data.listaTurno)
           setServicesSelected(response.data.serviciosMedicos)
-          setSelectedDay("TERMINADO")
+
         },
       )
 
     }
   }, [state])
-
-  // Para botones de dia de la semana.
-  const [selectedDay, setSelectedDay] = useState("MONDAY")
-  const [dayNumber, setDayNumber] = useState(1)
   
-  // Pasos del formulario. Ocultan una parte de este segun su paso.
-  const [step, setStep] = useState(1)
 
-  // Para setear hora de inicio y finalizacion de jornada, horas de descanso y si es un dia laboral.
-  const [startHour, setStartHour] = useState(dayjs().hour(8))
-  const [finishHour, setfinishHour] = useState(dayjs().hour(8))
-  const [isRestDay, setIsRestDay] = useState(false);
-  const [startLunch, setStartLunch] = useState(dayjs().hour(8))
-  const [finishLunch, setFinishLunch] = useState(dayjs().hour(8))
-
-  // Para guardar la semana laboral
-  const [workweek, setWorkweek] = useState([])
-
-  const [servicesSelected, setServicesSelected] = useState([])
-  const [loading, setLoading] = useState(false)
-
-  // Para activar o desactivar el boton de creación de medico.
-  const [lastStep, setlastStep] = useState(false)
   
   // Envia esta funcion a DragAndDrop para que setee el/los servicio(s)
   const handleServices = (services) => {
     setServicesSelected(services)
   }
-
-  const handleLunchStart = (hour) => {
-    setStartLunch(hour)
-  }
-
-  const handleLunchFinish = (hour) => {
-    setFinishLunch(hour)
-  }
-
-  const handleStartHour = (hour) => {
-    setStartHour(hour)
-  }
-
-  const handleFinishHour = (hour) => {
-    setfinishHour(hour)
-  }
-
-  // Elimina el ultimo dia añadido a la semana laboral y retrocede un paso en los dias laborales.
-  const undoWorkday = () => {
-
-    //TODO: Hay un problema que consiste en que si se esta en un edit en vez de un create, los turnos que sean "corregidos" tienen un nuevo ID en vez de usar el id del turno anterior
-    //      Esto se debe a que la funcion de abajo elimina el valor del array y cuando se crea un nuevo turno, este viene sin ID. Cuando es enviado al backend, al ver que no hay ID, crea uno nuevo
-
-    workweek.pop()
-
-    setSnackbar({
-      open: true,
-      message: "Jornada revertida.",
-      severity: "info"
-    });
-
-    switch (selectedDay) {
-
-      case "TUESDAY":
-        setSelectedDay("MONDAY")
-        setDayNumber(1)        
-        break;
-
-      case "WEDNESDAY":
-        setSelectedDay("TUESDAY")
-        setDayNumber(2)        
-        break;
-
-      case "THURSDAY":
-        setSelectedDay("WEDNESDAY") 
-        setDayNumber(3)        
-        break;
-
-      case "FRIDAY":
-        setSelectedDay("THURSDAY")
-        setDayNumber(4)        
-        break;
-
-      case "SATURDAY":
-        setSelectedDay("FRIDAY")
-        setDayNumber(5)        
-        break;
-
-      case "SUNDAY":
-        setDayNumber(6)        
-        setSelectedDay("SATURDAY")
-        break;
-
-      case "TERMINADO":
-        setlastStep(false)
-        setSelectedDay("SUNDAY")
-        break;
-    
-      default:
-        break;
-    }
-
-  }
-
-
-  const confirmWorkday = async () => {
-
-    // Verifica que las fechas sean validas.
-    if (finishHour.isBefore(startHour)){
-
-      setSnackbar({
-        open: true,
-        message: "Horas inválidas. Término de jornada es anterior a su inicio",
-        severity: "error"
-      });
-
-      return
-    }
-
-    if (finishHour.isSame(startHour)){
-
-      setSnackbar({
-        open: true,
-        message: "Horas inválidas. Término e inicio de jornadas son el mismo valor",
-        severity: "error"
-      });
-
-      return
-    }
-
-    if (startLunch.isSame(finishLunch)){
-
-      setSnackbar({
-        open: true,
-        message: "Horas inválidas. Término e inicio de almuerzo son el mismo valor",
-        severity: "error"
-      });
-
-      return
-    }
-
-    if (finishLunch.isBefore(startLunch)){
-
-      setSnackbar({
-        open: true,
-        message: "Horas inválidas. Término de almuerzo es anterior a su inicio.",
-        severity: "error"
-      });
-
-      return
-    }
-
-    // Si pasa las verificaciones, crea la jornada laboral con su hora de inicio, final, dia de la semana y si es o no dia de descanso.
-
-    let workDay = {
-      horaInicio: startHour.format("HH:mm"),
-      horaFinal: finishHour.format("HH:mm"),
-      horaInicioDescanso: startLunch.format("HH:mm"),
-      horaFinalDescanso: finishLunch.format("HH:mm"),
-      diaSemana: selectedDay,
-      descanso: isRestDay,
-      numeroDia: dayNumber
-    }
-
-    setSnackbar({
-      open: true,
-      message: "Jornada establecida",
-      severity: "success"
-    });   
-
-    // Añade la jornada a la semana laboral
-    workweek.push(workDay)
-
-    // Cambia el dia a ser asignado, cuando llegue al ultimo, habilita el boton de enviar formulario.
-
-    switch (selectedDay) {
-      case "MONDAY":
-        setSelectedDay("TUESDAY")
-        setDayNumber(2)        
-        break;
-      
-      case "TUESDAY":
-        setSelectedDay("WEDNESDAY")        
-        setDayNumber(3)        
-        break;
-
-      case "WEDNESDAY":
-        setSelectedDay("THURSDAY")
-        setDayNumber(4)        
-        break;
-
-      case "THURSDAY":
-        setSelectedDay("FRIDAY")
-        setDayNumber(5)        
-        break;
-
-      case "FRIDAY":
-        setSelectedDay("SATURDAY")
-        setDayNumber(6)        
-        break;
-
-      case "SATURDAY":
-        setSelectedDay("SUNDAY")
-        setDayNumber(7)        
-        break;
-
-      case "SUNDAY":
-        setSelectedDay("TERMINADO")
-        setlastStep(true)
-        break;
-    
-      default:
-        break;
-    }
-
-  }
-
-  
-  // Popups
-  const [snackbar, setSnackbar] = useState(
-    {
-      open: false,
-      message: "",
-      severity: "success"
-    }
-  );
-
-
+ 
   const handleFormSubmit = async (values) => {
     setLoading(true)
 
@@ -348,8 +120,6 @@ export default function Form() {
       serviciosMedicos: servicesSelected,
       listaTurno: workweek
     }
-
-    console.log(preparedForm)
 
     await axios
               .post(`${route}/medico/guardar`, preparedForm, {
@@ -532,120 +302,24 @@ export default function Form() {
             </Box>
 
             <Box hidden={step !== 3 ? true : false}>
-              <Card sx={{p:2, m:2}}>
-                <Typography variant="h4" color="green"> Jornada laboral</Typography>
-                <ButtonGroup disabled sx={{mb:10, mt:4}} variant="contained">
-                {daysOfWeek.map((item) => (
-                  <Button 
-                    sx={{color:"black!important"}}
-                    key={item.id} 
-                    variant={selectedDay === item.send ? "contained" : "text"}
-                  >
-                    {item.name}
-                  </Button>
-                ))}
-                </ButtonGroup>
-                <Box>
-                <FormControlLabel sx={{ml:3}} control={<Checkbox checked={isRestDay} onClick={() => setIsRestDay(!isRestDay)} />} label="Dia de descanso" />
-                </Box>
-
-                <Grid2 container>
-                  <Grid2 size={6}>
-                    <Card sx={{mx:2}}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <Typography variant="h4" align="center" gutterBottom>
-                        Hora de entrada
-                      </Typography>
-                      <Typography variant="h6" align="center" gutterBottom>
-                        Seleccione una hora
-                      </Typography>
-                      <DigitalClock 
-                        sx={{scrollbarWidth:'none', ml:2}} 
-                        ampm={false} 
-                        minTime={dayjs().hour(7).minute(30)}
-                        maxTime={dayjs().hour(20).minute(0)}
-                        onChange={handleStartHour}
-                      />
-                    </LocalizationProvider>
-                    </Card>
-                  </Grid2>
-                  <Grid2 size={6}>
-                    <Card sx={{mx:2}}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <Typography variant="h4" align="center" gutterBottom>
-                        Hora de salida
-                      </Typography>
-                      <Typography variant="h6" align="center" gutterBottom>
-                        Seleccione una hora
-                      </Typography>
-                      <DigitalClock 
-                        sx={{scrollbarWidth:'none', ml:2}}
-                        ampm={false} 
-                        minTime={startHour.add(30,"minutes")}
-                        maxTime={dayjs().hour(20).minute(0)}
-                        onChange={handleFinishHour}
-                      />
-                    </LocalizationProvider>
-                    </Card>
-                  </Grid2>
-                </Grid2>
-
-                <Grid2 container>
-                  <Grid2 size={6}>
-                    <Card sx={{mx:2, mt:4}}>
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <Typography variant="h4" align="center" gutterBottom>
-                          Inicio de almuerzo
-                        </Typography>
-                        <Typography variant="h6" align="center" gutterBottom>
-                          Seleccione una hora
-                        </Typography>
-                        <DigitalClock 
-                          sx={{scrollbarWidth:'none', ml:2}} 
-                          ampm={false} 
-                          minTime={dayjs().hour(7).minute(30)}
-                          maxTime={dayjs().hour(20).minute(0)}
-                          onChange={handleLunchStart}
-                        />
-                      </LocalizationProvider>
-                    </Card>
-                  </Grid2>
-
-                  <Grid2 size={6}>
-                    <Card sx={{mx:2, mt:4}}>
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <Typography variant="h4" align="center" gutterBottom>
-                          Término de almuerzo
-                        </Typography>
-                        <Typography variant="h6" align="center" gutterBottom>
-                          Seleccione una hora
-                        </Typography>
-                        <DigitalClock 
-                          sx={{scrollbarWidth:'none', ml:2}}
-                          ampm={false} 
-                          minTime={startHour.add(30,"minutes")}
-                          maxTime={dayjs().hour(20).minute(0)}
-                          onChange={handleLunchFinish}
-                        />
-                      </LocalizationProvider>
-                    </Card>
-                  </Grid2>
-                </Grid2>
-                
-                <Button sx={{m:2}} disabled={workweek.length === 0 ? true : false} variant="contained" onClick={undoWorkday}>Deshacer jornada</Button>
-                <Button disabled={lastStep} sx={{my:2}} variant="contained" onClick={confirmWorkday}>Confirmar jornada</Button>
-              </Card>
+              <WorkDaySetter 
+                setWorkweek={setWorkweek}
+                workweek={workweek}
+                lastStep={lastStep}
+                setlastStep={setlastStep}
+                state={state}
+              />
             </Box>
             
             <Box display="flex" justifyContent="end" mt="20px">
               <Button disabled={step === 1 ? true : false} onClick={() => setStep(step-1)} type="button" color="primary" variant="contained">
               Atras
               </Button>
+              <Button onClick={()=> console.log(workweek)}>
+                check
+              </Button>
               <Button disabled={step === 3 ? true : false} onClick={() => setStep(step+1)} type="button" color="primary" variant="contained">
               Siguiente
-              </Button>
-              <Button  onClick={() => console.log(workweek)} type="button" color="primary" variant="contained">
-              check
               </Button>
               <Button sx={{ml:2}} disabled={lastStep ? false : true} type="submit" color="secondary" variant="contained">
                 {loading ? <CircularProgress size={24} color="inherit" /> : "Añadir medico"}
