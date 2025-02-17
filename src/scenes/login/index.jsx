@@ -46,7 +46,7 @@ const LoginForm = () => {
     setLoading(true)
 
     await axios
-              .post(`${route}/personal/login`, values)
+              .post(`${route}/personal/login`, {headers: { referrerPolicy: "unsafe-url" }} , values)
               .then((response) => {
                   setToken(response.data);
                   setSnackbar({

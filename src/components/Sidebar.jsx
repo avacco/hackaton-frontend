@@ -81,7 +81,7 @@ const Sidebar = () => {
   useEffect(() => {
     axios
         .get(`${route}/user/user`,{
-          headers: { Authorization: "Bearer "+token }
+          headers: { Authorization: "Bearer "+token, referrerPolicy: "unsafe-url" }
         })
         .then(response => {          
           setresponsedata(response.data)   
