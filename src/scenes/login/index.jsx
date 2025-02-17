@@ -40,11 +40,13 @@ const LoginForm = () => {
     }
   );
 
+  const route = import.meta.env.VITE_API_ROUTE;
+
   const handleFormSubmit = async (values) => {
     setLoading(true)
 
     await axios
-              .post("http://localhost:8080/personal/login", values)
+              .post(`${route}/personal/login`, values)
               .then((response) => {
                   setToken(response.data);
                   setSnackbar({
