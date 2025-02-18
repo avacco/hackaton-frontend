@@ -41,12 +41,13 @@ const LoginForm = () => {
     }
   );
 
+  const httpsAgent = new https.Agent({ rejectUnauthorized: false });
   const route = import.meta.env.VITE_API_ROUTE;
   const handleFormSubmit = async (values) => {
     setLoading(true)
 
     await axios
-              .post(`${route}/personal/login`,{httpsAgent: new https.Agent({ rejectUnauthorized: false })}, values)
+              .post(`${route}/personal/login`, httpsAgent, values)
               .then((response) => {
                   setToken(response.data);
                   setSnackbar({
