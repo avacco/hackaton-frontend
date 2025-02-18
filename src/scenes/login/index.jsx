@@ -45,7 +45,7 @@ const LoginForm = () => {
     setLoading(true)
 
     await axios
-              .post(`${route}/personal/login`, httpsAgent, values)
+              .post(`${route}/personal/login`, values)
               .then((response) => {
                   setToken(response.data);
                   setSnackbar({
