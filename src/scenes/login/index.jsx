@@ -6,6 +6,7 @@ import { Formik } from "formik";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../provider/AuthProvider";
+import https from "https";
 
 const LoginForm = () => {
 
@@ -41,7 +42,6 @@ const LoginForm = () => {
   );
 
   const route = import.meta.env.VITE_API_ROUTE;
-  const https = require('https')
   const handleFormSubmit = async (values) => {
     setLoading(true)
 
