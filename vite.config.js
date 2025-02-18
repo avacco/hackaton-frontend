@@ -10,4 +10,9 @@ export default {
     commonjsOptions: {
        esmExternals: true 
     },
+    server: {
+      https: {
+        rejectUnauthorized: false
+      }
+    }
   }}
