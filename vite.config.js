@@ -10,6 +10,7 @@ export default {
     commonjsOptions: {
        esmExternals: true 
     },
+    // Configuracion peligrosa, existe solo para demostracion. Desactiva la verificacion de certificados.
     server: {
       https: {
         rejectUnauthorized: false
