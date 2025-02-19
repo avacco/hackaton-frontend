@@ -2,7 +2,7 @@ import { Alert, Box, Button, ButtonGroup, Card, Checkbox, FormControlLabel, Grid
 import { DigitalClock, LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 function WorkDaySetter({ workweek, setWorkweek, lastStep, setlastStep, state  }) {
 
@@ -17,6 +17,7 @@ function WorkDaySetter({ workweek, setWorkweek, lastStep, setlastStep, state  })
     const [isRestDay, setIsRestDay] = useState(false);
     const [startLunch, setStartLunch] = useState(dayjs().hour(8))
     const [finishLunch, setFinishLunch] = useState(dayjs().hour(8))
+    const [workDayText, setWorkDayText] = useState(``)
 
     // Popups
     const [snackbar, setSnackbar] = useState(
@@ -54,6 +55,16 @@ function WorkDaySetter({ workweek, setWorkweek, lastStep, setlastStep, state  })
         id: 6, name: "Terminado", send: "TERMINADO"
       },
     ]
+
+    // Muestra la jornada laboral actual si esta ya fue establecida.
+    useEffect(() => {
+    if(workweek.find((workday) => workday.diaSemana === selectedDay)) { 
+      setWorkDayText(`Jornada: ${workweek.find((workday) => workday.diaSemana === selectedDay).horaInicio} - ${workweek.find((workday) => workday.diaSemana === selectedDay).horaFinal} | Descanso: ${workweek.find((workday) => workday.diaSemana === selectedDay).horaInicioDescanso} - ${workweek.find((workday) => workday.diaSemana === selectedDay).horaFinalDescanso}`)
+    } else { 
+      setWorkDayText(``)
+    }
+    }, [selectedDay])
+    
 
     const confirmWorkday = async () => {
 
@@ -93,7 +104,7 @@ function WorkDaySetter({ workweek, setWorkweek, lastStep, setlastStep, state  })
       } else {
         setWorkweek([...workweek, workDay])
       }
-      
+
       setSnackbar({
         open: true,
         message: "Jornada establecida",
@@ -106,8 +117,8 @@ function WorkDaySetter({ workweek, setWorkweek, lastStep, setlastStep, state  })
   const handleDaySelection = (day) => {
     setSelectedDay(day)
     setlastStep(false)
-
-    switch (day) {
+    
+      switch (day) {
       case "MONDAY":
         setDayNumber(1)        
         break;
@@ -164,9 +175,12 @@ function WorkDaySetter({ workweek, setWorkweek, lastStep, setlastStep, state  })
       ))}
       </ButtonGroup>
       <Box>
+        <Button disabled={lastStep} sx={{mb:2, mr:2}} variant="contained" onClick={confirmWorkday}>Confirmar jornada</Button>
+        {workDayText}
+      </Box>
+      <Box>
       <FormControlLabel sx={{ml:3}} control={<Checkbox checked={isRestDay} onClick={() => setIsRestDay(!isRestDay)} />} label="Dia de descanso" />
       </Box>
-
       <Grid2 container>
         <Grid2 size={6}>
           <Card sx={{mx:2}}>
@@ -249,7 +263,6 @@ function WorkDaySetter({ workweek, setWorkweek, lastStep, setlastStep, state  })
           </Card>
         </Grid2>
       </Grid2>      
-      <Button disabled={lastStep} sx={{my:2}} variant="contained" onClick={confirmWorkday}>Confirmar jornada</Button>
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

@@ -1,4 +1,4 @@
-import { Alert, Box, Button, ButtonGroup, Card, Checkbox, CircularProgress, Container, FormControlLabel, Grid2, Snackbar, TextField, Typography } from "@mui/material"
+import { Alert, Box, Button, ButtonGroup, Card, Checkbox, CircularProgress, Container, FormControlLabel, Grid2, InputAdornment, Snackbar, TextField, Typography } from "@mui/material"
 import { Formik } from "formik"
 import * as yup from "yup"
 import Header from "../../../components/Header"
@@ -9,6 +9,7 @@ import axios from "axios";
 import DragAndDrop from "./components/DragAndDrop";
 import { useLocation } from "react-router-dom";
 import WorkDaySetter from "./components/WorkDaySetter";
+import { AttachMoneyOutlined } from "@mui/icons-material";
 
 export default function Form() {
   const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -275,6 +276,14 @@ export default function Form() {
                       name="sueldo"
                       error={!!touched.sueldo && !!errors.sueldo} 
                       helperText={touched.sueldo && errors.sueldo}
+                      slotProps={{
+                        input: {
+                          startAdornment: 
+                          <InputAdornment position="start">
+                            <AttachMoneyOutlined fontSize="10" />
+                          </InputAdornment>
+                        }
+                      }}
                       sx={{ gridColumn: "span 4" }}
                   />
                   <TextField 
