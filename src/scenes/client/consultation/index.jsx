@@ -105,9 +105,10 @@ const Consultation = () => {
     const hour = value.hour();
     const minute = value.minute();
     
-    // Horas de inicio y fin de operaciones en clinica, bloques fuera de este rango son desactivados
-    if (hour < 8) return true;
-    if (hour > 19) return true;
+    // Desactiva bloques antes de Hora inicio y Hora fin (jornada del medico).
+    if (hour < startHour.hour()) return true;
+    if (hour >= finishHour.hour()) return true;
+
 
     // Verifica el array de bloques faltantes, retorna true si el bloque esta en la lista
     if (missingBlocks.includes(`${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`)) return true;
@@ -140,7 +141,10 @@ const Consultation = () => {
   
   
   const checkServices = () => {
-
+    console.log("Valores faltantes:", missingBlocks);
+    console.log("Hora inicio: ", startHour.format("HH:mm"));
+    console.log("Hora fin: ", finishHour.format("HH:mm"));
+    console.log("Bloques de tiempo: ", timeBlocks);
     targetDoc.listaTurno.forEach((turn) => (
       turn.numeroDia === targetDay.day() ? console.log(turn) : null
     ))

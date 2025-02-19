@@ -123,7 +123,7 @@ export default function Form() {
     }
 
     await axios
-              .post(`${route}/medico/guardar`, preparedForm, {
+              .post(`${route}/medico/crear`, preparedForm, {
                 headers: { Authorization: "Bearer "+token }
               },)
               .then((response) => {
@@ -156,6 +156,7 @@ export default function Form() {
         initialValues={initialValues}
         validationSchema={userSchema}
         enableReinitialize
+        validateOnChange={false}
       >
         {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
