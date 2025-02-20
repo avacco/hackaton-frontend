@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, Fade, Modal, Backdrop, Collapse, FormControlLabel, Checkbox } from "@mui/material";
-import { BsTelephone, BsEnvelope, BsClock, BsGeoAlt } from "react-icons/bs";
+import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, Collapse, FormControlLabel, Checkbox, Fade, Modal, Backdrop, CardHeader, IconButton } from "@mui/material";
 import { Footer } from "../../../components/Footer";
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import * as yup from 'yup';
@@ -11,6 +10,7 @@ import dayjs from "dayjs";
 import es from 'dayjs/locale/es';
 import GlobalCarousel from "../../../components/GlobalCarousel";
 import axios from "axios";
+import { Close } from "@mui/icons-material";
 
 const Consultation = () => {
 
@@ -19,6 +19,11 @@ const Consultation = () => {
 
   // Reservado para dias colmados
   const [blockedDates, setBlockedDates] = useState([dayjs("2025-03-03"), dayjs("2025-03-05")])
+
+  // Controles de modal
+  const [openModal, setOpenModal] = useState(false)
+  const handleOpen = () => setOpenModal(true);
+  const handleClose = () => setOpenModal(false);
 
   // Define los dias de la semana y el horario en que el medico puede atender
   const [allowedDays, setAllowedDays] = useState([])
@@ -48,27 +53,28 @@ const Consultation = () => {
 
   }, [blockedDates, allowedDays, today])
 
-  // Controles de modal
-  const [openModal, setOpenModal] = useState(false)
-  const handleOpen = () => setOpenModal(true);
-  const handleClose = () => setOpenModal(false);
-
   // Estados de cards
   const [doctorDropdown, setDoctorDropdown] = useState(false);
   const [calendarCard, setCalendarCard] = useState(false);
   const [hourCard, setHourCard] = useState(false);
-  
+  const [settingPatient, setSettingPatient] = useState(false)
+  const [askForDNI, setAskForDNI] = useState(true);
+  const [servicesCard, setServicesCard] = useState(false)
+
   // Contenedores de valores para creacion de servicio
   const [targetService, setTargetService] = useState("");
   const [targetDoc, setTargetDoc] = useState("");
   const [targetDay, setTargetDay] = useState(dayjs());
   const [targetHour, setTargetHour] = useState(dayjs());
-  const [patientId, setPatientId] = useState(null);
+  const [patient, setPatient] = useState({});
+  const [obraSocial, setObraSocial] = useState(false);
+  const [servicePack, setServicePack] = useState([])
+  const [packId, setPackId] = useState(crypto.randomUUID())
 
   // Contenedores de responses
   const [services, setServices] = useState([])
   const [docs, setDocs] = useState([])
-  const [idService, setIdService] = useState("")
+
 
   const route = import.meta.env.VITE_API_ROUTE;
 
@@ -134,110 +140,41 @@ const Consultation = () => {
     // Encuentra los valores faltantes y los setea en el estado
     let missingTimes = allTimes.filter(time => !timeBlocks.includes(time));
     setMissingBlocks(missingTimes);
-
-    console.log("Valores faltantes:", missingTimes);
-
   }
-  
-  
+ 
+  // para testeo
   const checkServices = () => {
-    console.log("Valores faltantes:", missingBlocks);
-    console.log("Hora inicio: ", startHour.format("HH:mm"));
-    console.log("Hora fin: ", finishHour.format("HH:mm"));
-    console.log("Bloques de tiempo: ", timeBlocks);
-    targetDoc.listaTurno.forEach((turn) => (
-      turn.numeroDia === targetDay.day() ? console.log(turn) : null
-    ))
-
+    console.log(servicePack)
+    console.log(patient)
   }
-
-   // Control de primer paso (Seleccion de servicio)
-   const handleServiceSelection = async (e) => {
-    setDoctorDropdown(true); // abre dropdown de doctor, cierra los demas si estaban abiertos
-
-    axios
-        .get(`${route}/medico/servicio_con_medicos/${e.target.value}`)
-        .then(response => {
-          setDocs(response.data.nombresMedicos);
-          setIdService(response.data.id_servicio);
-        })
-        .catch((error) => {
-          console.log(error);
-        })
-
-    setCalendarCard(false);
-    setHourCard(false);
-
-    setTargetService(e.target.value); // setea valor correspondiente, limpia los demas
-    setTargetDoc("");
-    setTargetDay(dayjs());
-    setTargetHour(dayjs());
-  }
-
-  // Control de segundo paso (Seleccion de medico)
-   const handleDoctorSelection = async (e) => {
-    setCalendarCard(true);
-    setHourCard(false);
-
-    setTargetDoc(e.target.value)
-    
-    setTargetDay(dayjs());
-    setTargetHour(dayjs());
-
-    // Los dias y horas disponibles se calculan en un useEffect mas arriba. 
-
-  }
-
-  // Control de tercer paso (Seleccion de fecha)
-  const handleDateSelection = (newDate) => {
-    setTargetDay(newDate);
-    setHourCard(true);
-    setTargetHour(dayjs());
-
-    // Verificar si el dia seleccionado esta en la lista de dias disponibles, si lo esta, setea las horas disponibles, hora de inicio y hora de termino.
-    targetDoc.listaTurno.forEach((turn) => (
-      turn.numeroDia === newDate.day() ? (setstartHour(dayjs(turn.horaInicio, "HH:mm")), setfinishHour(dayjs(turn.horaFinal, "HH:mm")), setTimeBlocks(turn.horaBloque)) : null
-    ))
-    
-  };
-
-  // Control de cuarto paso (Seleccion de hora)
-  // Muestra en consola la hora seleccionada Esto sera usado para enviar por api mas adelante.
-  const handleHourSelection = (newHour) => {
-    setTargetHour(newHour);
-    handleOpen();
-  };
-
-  // Control de quinto paso (Asignacion de paciente)
-
+  
+  // Control de primer paso (Asignacion de paciente)
   const handlePatientFetch = async (values) => {
     if (loading) return;
 
-    console.log(values);
-    console.log(values.fetchdni);
     setLoading(true);
 
       axios
         .get(`${route}/paciente/buscar/${values.fetchdni}`)
         .then(response => {
-
-          setSnackbar({
-            open: true,
-            message: "Paciente ha sido registrado antes",
-            severity: "success"
-          });
-
           if(response.data.length === 0){
          
             setSnackbar({
               open: true,
-              message: "Paciente no encontrado. Por favor, rellene el formulario",
+              message: "Paciente no ha sido registrado. Si se ha equivocado de Cédula, escribala de nuevo. Si no ha sido registrado, rellene el formulario.",
               severity: "info"
             });
+            setSettingPatient(true);
           } else {
-            setPatientId(response.data.id_persona);
-            // saltarse el sexto paso e ir directo al septimo
-            
+            setSnackbar({
+              open: true,
+              message: "Paciente ha sido registrado antes",
+              severity: "success"
+            });
+            setPatient(response.data)
+            setSettingPatient(false)
+            setServicesCard(true)
+            setAskForDNI(false)
           }
         })
         .catch((error) => {
@@ -251,9 +188,8 @@ const Consultation = () => {
 
   }
 
-  // Control de sexto paso opcional (Creacion de paciente si no existe (y asignacion))
+  // Creacion de paciente si este no existe
   const handleFormSubmit = async (values) => {
-    if (loading) return;
 
     setLoading(true);
     
@@ -265,8 +201,9 @@ const Consultation = () => {
           message: "Paciente ha sido registrado",
           severity: "success"
         });
-        setPatientId(response.data.id_persona);
-
+        setPatient(response.data);
+        setAskForDNI(false)
+        setServicesCard(true)
       })
       .catch((error) => {
         setSnackbar({
@@ -279,24 +216,91 @@ const Consultation = () => {
 
   };
 
-  // Control de septimo paso (Creacion de consulta)
+
+   // Control de segundo paso paso (Seleccion de servicio)
+   const handleServiceSelection = async (e) => {
+    setDoctorDropdown(true); // abre dropdown de doctor, cierra los demas si estaban abiertos
+
+    axios
+        .get(`${route}/medico/servicio_con_medicos/${e.target.value}`)
+        .then(response => {
+          setDocs(response.data.nombresMedicos);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+
+    setCalendarCard(false);
+    setHourCard(false);
+
+    +
+    setTargetService(e.target.value); // setea valor correspondiente, limpia los demas
+    setTargetDoc("");
+    setTargetDay(dayjs());
+    setTargetHour(dayjs());
+  }
+
+  // Control de tercer paso (Seleccion de medico)
+   const handleDoctorSelection = async (e) => {
+    setCalendarCard(true);
+    setHourCard(false);
+
+    setTargetDoc(e.target.value)
+    
+    setTargetDay(dayjs());
+    setTargetHour(dayjs());
+
+    // Los dias y horas disponibles se calculan en un useEffect mas arriba. 
+
+  }
+
+  // Control de cuarto paso (Seleccion de fecha)
+  const handleDateSelection = (newDate) => {
+    setTargetDay(newDate);
+    setHourCard(true);
+    setTargetHour(dayjs());
+
+    // Verificar si el dia seleccionado esta en la lista de dias disponibles, si lo esta, setea las horas disponibles, hora de inicio y hora de termino.
+    targetDoc.listaTurno.forEach((turn) => (
+      turn.numeroDia === newDate.day() ? (setstartHour(dayjs(turn.horaInicio, "HH:mm")), setfinishHour(dayjs(turn.horaFinal, "HH:mm")), setTimeBlocks(turn.horaBloque)) : null
+    ))
+    
+  };
+
+  // Control de quinto paso (Seleccion de hora)
+  const handleHourSelection = (newHour) => {
+    setTargetHour(newHour);
+    handleOpen();
+  };
+
+  // Control de sexto paso (Creacion de consulta y envio)
   const handleConsultationSubmit = async () => {
     if (loading) return;
 
     setLoading(true);
     
+    // Prepara datos de consulta medica
+    let preparedConsultation = {
+      fechaConsulta: targetDay.format("YYYY-MM-DD"),
+      horaTurno: targetHour.format("HH:mm"),
+      pagadoONo: "NO",
+      medico: { id_persona: targetDoc.id_medico },
+      paciente: { id_persona: patient.id_persona },
+      servicio: { codigo_servicio: targetService },
+    }
+    // Añade datos de consulta medica a array de paquete de servicios
+    let request = [...servicePack, preparedConsultation]
+
+
     let data = {
-      "fechaConsulta": targetDay.format("YYYY-MM-DD"),
-      "horaTurno": targetHour.format("HH:mm"),
-      "turno": { "id_turno": 1 }, 
-      "pagadoONo": "NO",
-      "paciente": { "id_persona": patientId },
-      "medico": { "id_persona": targetDoc.id_persona },
-      "servicio": { "codigo_servicio": idService }
+      id_sp: packId,
+      consultas: request
     }
 
+    console.log(data)
+
     axios
-      .post(`${route}/consulta/crear`, data)
+      .post(`${route}/consultation/create`, data)
       .then(response => {
         setSnackbar({
           open: true,
@@ -309,7 +313,11 @@ const Consultation = () => {
         setTargetDoc("");
         setTargetDay(dayjs());
         setTargetHour(dayjs());
-        setPatientId(null);
+        handleClose();
+        setHourCard(false)
+        setCalendarCard(false)
+        setDoctorDropdown(false)
+        setServicePack([]);
 
       })
       .catch((error) => {
@@ -322,6 +330,33 @@ const Consultation = () => {
       .finally(setLoading(false))
   }
 
+  // Adicion de servicio adicional
+  const handleAddService = async () => {
+
+    // Cierra el modal
+    handleClose()
+    setHourCard(false)
+    setCalendarCard(false)
+    setDoctorDropdown(false)
+
+    // Prepara datos de consulta medica
+    let preparedConsultation = {
+      fechaConsulta: targetDay.format("YYYY-MM-DD"),
+      horaTurno: targetHour.format("HH:mm"),
+      pagadoONo: "NO",
+      medico: { id_persona: targetDoc.id_medico },
+      paciente: { id_persona: patient.id_persona },
+      servicio: { codigo_servicio: targetService },
+    }
+    // Añade datos de consulta medica a array de paquete de servicios
+    setServicePack([...servicePack, preparedConsultation])
+
+    setTargetService("");
+    setTargetDoc("");
+    setTargetDay(dayjs());
+    setTargetHour(dayjs());
+
+  }
 
   // Valores para formulario
   const initialValues = {
@@ -332,11 +367,11 @@ const Consultation = () => {
     email: "correo@correo.com",
     telefono: "56912123434",
     direccion: "Casa",
-    obraSocial: false,
+    obraSocial: obraSocial,
   }
 
   const fetchInitialValues = {
-    fetchdni: "123123123",
+    fetchdni: "",
   }
   
   // Esquema de validacion de yup
@@ -344,7 +379,7 @@ const Consultation = () => {
     nombre: yup.string().required("Requerido"),
     apellido: yup.string().required("Requerido"),
     dni: yup.string().required("Requerido"),
-    fechaNacl: yup.date().required("Requerido"),
+    fechaNac: yup.date().required("Requerido"),
     email: yup.string().email("Correo inválido").required("Requerido"),
     telefono: yup.number().required("Requerido"),
     direccion: yup.string().required("Requerido"),
@@ -366,8 +401,192 @@ const Consultation = () => {
     <>
     <GlobalCarousel />
     <Container maxWidth="xl" sx={{ py: 8 }}>
-      <Grid2 container spacing={4} display='flex'>
+  {/* Seccion paciente */}
+      <Grid2 container mt={4} spacing={4} display='flex'>
+        {/* Espaciado */}
+        <Grid2 size={{xs:12, md:2}}>
+        <Box sx={{my:2}}>
+                <Button onClick={checkServices} variant="contained">check</Button>
+              </Box>
+        </Grid2>
+
+        <Grid2 size={{xs:12, md:8}}>
+          {/* Pide DNI */}
+          <Collapse orientation='vertical' in={askForDNI}>
+            <Card sx={{ height: "100%", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
+              <CardContent sx={{ m:5, mx:10}}>
+                <Typography align='center' variant="h4" gutterBottom>
+                    Ingrese el DNI o Cédula del paciente
+                  </Typography>
+                  <Formik
+                      onSubmit={handlePatientFetch}
+                      initialValues={fetchInitialValues}
+                    >
+                    {({ values, handleChange, handleSubmit }) => (
+                    <form onSubmit={handleSubmit}>
+                      <Box>
+                        <TextField
+                          fullWidth
+                          label="Cédula o DNI"
+                          name="fetchdni"
+                          value={values.fetchdni}
+                          onChange={handleChange}
+                          placeholder="DNI o Cédula"
+                        />
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            size="large"
+                            fullWidth
+                            disabled={loading}
+                          >
+                            Consultar
+                        </Button>
+                      </Box>
+                    </form>
+                    )}
+                  </Formik>
+              </CardContent>
+            </Card>
+          </Collapse>
+          {/* Formulario paciente */}
+          <Collapse orientation='vertical' in={settingPatient}>
+            <Card>
+              <CardContent>
+              <Typography variant="h2" gutterBottom>
+                  Registro de paciente
+                </Typography>
+                <Formik
+                  onSubmit={handleFormSubmit}
+                  initialValues={initialValues}
+                  validationSchema={formSchema}
+                >
+                {({ values, errors, touched, handleChange, handleSubmit }) => (
+                  <form onSubmit={handleSubmit}>
+                    <Grid2 container spacing={2}>
+                      <Grid2 size={6}>
+                        <TextField
+                          fullWidth
+                          label="Nombre"
+                          name="nombre"
+                          value={values.nombre}
+                          onChange={handleChange}
+                          error={!!touched.nombre && !!errors.nombre}
+                          helperText={touched.nombre && errors.nombre}
+                          required
+                        />
+                      </Grid2>
+                      <Grid2 size={6}>
+                        <TextField
+                          fullWidth
+                          label="Apellido"
+                          name="apellido"
+                          value={values.apellido}
+                          onChange={handleChange}
+                          error={!!touched.apellido && !!errors.apellido}
+                          helperText={touched.apellido && errors.apellido}
+                          required
+                        />
+                      </Grid2>
+                      
+                        <TextField
+                          fullWidth
+                          label="Correo"
+                          name="email"
+                          type="email"
+                          value={values.email}
+                          onChange={handleChange}
+                          error={!!touched.email && !!errors.email}
+                          helperText={touched.email && errors.email}
+                          required
+                        />
+
+                        <TextField
+                          fullWidth
+                          label="DNI o Cédula"
+                          name="dni"
+                          type="dni"
+                          value={values.dni}
+                          onChange={handleChange}
+                          error={!!touched.dni && !!errors.dni}
+                          helperText={touched.dni && errors.dni}
+                          required
+                        />
+
+                        <TextField 
+                          fullWidth
+                          label="Fecha de nacimiento"
+                          name="fechaNac"
+                          type="date"
+                          value={values.fechaNac}
+                          onChange={handleChange}
+                          error={!!touched.fechaNac && !!errors.fechaNac}
+                          helperText={touched.fechaNac && errors.fechaNac}
+                        />
+                      
+                        <TextField
+                          fullWidth
+                          label="Número de contacto"
+                          name="telefono"
+                          value={values.telefono}
+                          onChange={handleChange}
+                          error={!!touched.telefono && !!errors.telefono}
+                          helperText={touched.telefono && errors.telefono}
+                        />
+                      
+                        <TextField
+                          fullWidth
+                          label="Dirección"
+                          name="direccion"
+                          value={values.direccion}
+                          onChange={handleChange}
+                          error={!!touched.direccion && !!errors.direccion}
+                          helperText={touched.direccion && errors.direccion}
+                        />
+
+                        <Box>
+                          <FormControlLabel sx={{ml:3}} control={<Checkbox onClick={() => setObraSocial(!obraSocial)} value={values.obraSocial} checked={obraSocial} />} label="¿Obra social?" />
+                        </Box>
+                      
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          size="large"
+                          fullWidth
+                          disabled={loading}
+                        >
+                          {loading ? "Registrando..." : "Registrar paciente"}
+                        </Button>
+                    </Grid2>
+                  </form>
+                  )}
+                </Formik>
+              </CardContent>
+            </Card>
+          </Collapse>
+          {/* Info de paciente */}
+          <Collapse orientation="vertical" in={Object.keys(patient).length > 0 ? true : false}>
+            <Card>
+              <CardContent>
+                <Typography>Nombre: {patient.nombre} {patient.apellido}</Typography>
+                <Typography>Cédula: {patient.dni}</Typography>
+                <Typography>Fecha de nacimiento: {patient.fechaNac}</Typography>
+                <Typography>Correo: {patient.email}</Typography>
+                <Typography>Contacto: {patient.telefono}</Typography>
+                <Typography>Direccion: {patient.direccion}</Typography>
+                <Typography>Obra social: {patient.obraSocial ? "Si" : "No"}</Typography>
+              </CardContent>
+            </Card>
+          </Collapse>
+        </Grid2>
+        {/* Espaciado */}
+        <Grid2 size={{xs:12, md:2}}>
+        </Grid2>
+      </Grid2>
+    {/* Seccion servicios */}
+      <Grid2 container spacing={4} mt={4} display='flex'>
         <Grid2 size={{xs:12, md:5}}>
+        <Collapse orientation='vertical' in={servicesCard}>
           <Card>
             <CardContent>
               <Typography variant="h4" gutterBottom>
@@ -410,14 +629,9 @@ const Consultation = () => {
                 </Collapse>
 
               </Box>
-
-              <Box sx={cardBox}>
-                <Box>
-                  <Button onClick={checkServices} variant="contained">check</Button>
-                </Box>
-              </Box>
             </CardContent>
           </Card>
+        </Collapse>
         </Grid2>
 
         <Grid2 size={{xs:12, md:5}}>
@@ -446,7 +660,7 @@ const Consultation = () => {
                     />
                   </LocalizationProvider>
                   <Typography variant="body2" align="center" color="textSecondary" sx={{ mt: 2 }}>
-                    Solo los dias disponibles pueden ser seleccionados
+                    Solo los días disponibles pueden ser seleccionados
                   </Typography>
                 </Box>
               </Box>
@@ -485,23 +699,7 @@ const Consultation = () => {
         </Grid2>
       </Grid2>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Container>
-    <Footer />
-
-    <Modal
+      <Modal
         open={openModal}
         onClose={handleClose}
         closeAfterTransition
@@ -522,163 +720,61 @@ const Consultation = () => {
               bgcolor: 'background.paper',
               border: '2px solid #000',
               boxShadow: 24,
-              p: 4,
+
             }}
           >
-            <Card sx={{ height: "100%", boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}>
+            <Card>
+              <CardHeader 
+                action={<IconButton onClick={()=> handleClose()}><Close/></IconButton>} 
+                title="Confirmar pedido"
+              />
               <CardContent>
-                { patientId ? (
-                  <>
-                    <Typography variant="h2" gutterBottom>
-                      Datos del paciente
-                    </Typography>
-                    <Formik
-                      onSubmit={handleFormSubmit}
-                      initialValues={initialValues}
-                      validationSchema={formSchema}
-                    >
-                    {({ values, errors, touched, handleChange, handleSubmit }) => (
-                      <form onSubmit={handleSubmit}>
-                        <Grid2 container spacing={2}>
-                          <Grid2 size={6}>
-                            <TextField
-                              fullWidth
-                              label="Nombre"
-                              name="nombre"
-                              value={values.nombre}
-                              onChange={handleChange}
-                              error={!!touched.nombre && !!errors.nombre}
-                              helperText={touched.nombre && errors.nombre}
-                              required
-                            />
-                          </Grid2>
-                          <Grid2 size={6}>
-                            <TextField
-                              fullWidth
-                              label="Apellido"
-                              name="apellido"
-                              value={values.apellido}
-                              onChange={handleChange}
-                              error={!!touched.apellido && !!errors.apellido}
-                              helperText={touched.apellido && errors.apellido}
-                              required
-                            />
-                          </Grid2>
-                          
-                            <TextField
-                              fullWidth
-                              label="Correo"
-                              name="email"
-                              type="email"
-                              value={values.email}
-                              onChange={handleChange}
-                              error={!!touched.email && !!errors.email}
-                              helperText={touched.email && errors.email}
-                              required
-                            />
+              <Typography mb={2}>
+                Por favor revise los detalles de su pedido.
+              </Typography>
 
-                            <TextField
-                              fullWidth
-                              label="DNI o Cédula"
-                              name="dni"
-                              type="dni"
-                              value={values.dni}
-                              onChange={handleChange}
-                              error={!!touched.dni && !!errors.dni}
-                              helperText={touched.dni && errors.dni}
-                              required
-                            />
+              <Typography><b>Medico asignado:</b> {targetDoc.nombre} {targetDoc.apellido}</Typography>
+              <Typography><b>Dia de cita:</b> {targetDay.format("DD/MM/YYYY")}</Typography>
+              <Typography><b>Hora de cita:</b> {targetHour.format("HH:mm")}</Typography>
+              <Typography><b>Paciente citado:</b> {patient.nombre} {patient.apellido}</Typography>
 
-                            <TextField 
-                              fullWidth
-                              label="Fecha de nacimiento"
-                              name="fechaNac"
-                              type="date"
-                              value={values.fechaNac}
-                              onChange={handleChange}
-                              error={!!touched.fechaNac && !!errors.fechaNac}
-                              helperText={touched.fechaNac && errors.fechaNac}
-                            />
-                          
-                            <TextField
-                              fullWidth
-                              label="Número de contacto"
-                              name="telefono"
-                              value={values.telefono}
-                              onChange={handleChange}
-                              error={!!touched.telefono && !!errors.telefono}
-                              helperText={touched.telefono && errors.telefono}
-                            />
-                          
-                            <TextField
-                              fullWidth
-                              label="Dirección"
-                              name="direccion"
-                              value={values.direccion}
-                              onChange={handleChange}
-                              error={!!touched.direccion && !!errors.direccion}
-                              helperText={touched.direccion && errors.direccion}
-                            />
+              <Typography sx={{color: 'GrayText', fontSize: 14}} mt={2}>
+              Si requiere de servicios adicionales, presione en Añadir servicio adicional.
+              </Typography>
 
-                            <Box>
-                              <FormControlLabel sx={{ml:3}} control={<Checkbox checked={values.obraSocial} />} label="¿Obra social?" />
-                            </Box>
-                          
-                            <Button
-                              type="submit"
-                              variant="contained"
-                              size="large"
-                              fullWidth
-                              disabled={loading}
-                            >
-                              {loading ? "Enviando..." : "Enviar mensaje"}
-                            </Button>
-                        </Grid2>
-                      </form>
-                      )}
-                    </Formik>
-                  </>
-                  ) : (
-                  <>
-                  <Typography align='center' variant="h4" gutterBottom>
-                      Ingrese el DNI o Cédula del paciente
-                    </Typography>
-                    <Formik
-                        onSubmit={handlePatientFetch}
-                        initialValues={fetchInitialValues}
-                      >
-                      {({ values, errors, touched, handleChange, handleSubmit }) => (
-                      <form onSubmit={handleSubmit}>
-                        <Box>
-                          <TextField
-                            fullWidth
-                            label="Cédula o DNI"
-                            name="fetchdni"
-                            value={values.fetchdni}
-                            onChange={handleChange}
-                            placeholder="DNI o Cédula"
-                          />
-                          <Button
-                              type="submit"
-                              variant="contained"
-                              size="large"
-                              fullWidth
-                              disabled={loading}
-                            >
-                              Consultar
-                          </Button>
-                        </Box>
-                      </form>
-                      )}
-                    </Formik>
-                  </>
-                  )}
-                
+              <Box sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "12px",
+                marginTop: "24px"
+              }}>
+
+              </Box>
+                <Button variant="contained" color="primary" onClick={() => handleConsultationSubmit() }>Confirmar pedido</Button>
+                <Button variant="outlined" color="info" onClick={() => handleAddService()}>Añadir servicio adicional</Button>
               </CardContent>
             </Card>
           </Box>
         </Fade>
       </Modal>
+
+
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Container>
+    <Footer />
 
     </>
   );

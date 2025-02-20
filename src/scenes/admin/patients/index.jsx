@@ -64,7 +64,7 @@ export default function Patients() {
       flex: 1
     },
     {
-      field: "fecha_nac", 
+      field: "fechaNac", 
       headerName: "Fecha de nacimiento", 
       flex: 1
     },
