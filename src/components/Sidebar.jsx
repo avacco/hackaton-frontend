@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ProSidebar, Menu, MenuItem } from 'react-pro-sidebar'
 import { Box, IconButton, Typography } from '@mui/material'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { HomeOutlined, PeopleOutlineOutlined, ContactsOutlined, ReceiptOutlined, PersonOutlineOutlined, CalendarTodayOutlined, MenuOutlined, SupervisorAccountOutlined, AdminPanelSettingsOutlined, LogoutOutlined, ManageAccountsOutlined, MedicalServicesOutlined } from '@mui/icons-material'
+import { HomeOutlined, PeopleOutlineOutlined, ContactsOutlined, ReceiptOutlined, PersonOutlineOutlined, CalendarTodayOutlined, MenuOutlined, SupervisorAccountOutlined, AdminPanelSettingsOutlined, LogoutOutlined, ManageAccountsOutlined, MedicalServicesOutlined, Person3Outlined } from '@mui/icons-material'
 import 'react-pro-sidebar/dist/css/styles.css';
 import { useAuth } from '../provider/AuthProvider'
 import axios from 'axios'
@@ -64,6 +64,10 @@ const Sidebar = () => {
         setSelected("Formulario servicios")
         break;
 
+      case "/system/patientform":
+        setSelected("Formulario pacientes")
+        break;
+        
       case "/system/calendar":
         setSelected("Citas")
         break;
@@ -155,16 +159,18 @@ const Sidebar = () => {
             <Item title="Médicos" to="/system/employees" icon={<PeopleOutlineOutlined />} selected={selected} />
             <Item title="Pacientes" to="/system/patients" icon={<ContactsOutlined />} selected={selected} />
             <Item title="Facturas" to="/system/invoices" icon={<ReceiptOutlined />} selected={selected} />
-            <Item title="Servicios" to="/system/services" icon={<MedicalServicesOutlined />} selected={selected} />
+            <Item title="Servicios" to="/system/services" icon={<MedicalServicesOutlined />} selected={selected} /> 
 
             <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Paginas</Typography>
 
             <Item title="Formulario admin" to="/system/adminform/" icon={<SupervisorAccountOutlined />} selected={selected} />
             <Item title="Formulario médicos" to="/system/form" icon={<PersonOutlineOutlined />} selected={selected} />
             <Item title="Formulario servicios" to="/system/serviceform" icon={<ManageAccountsOutlined />} selected={selected} />
-            <Item title="Citas" to="/system/calendar" icon={<CalendarTodayOutlined />} selected={selected} />
+            <Item title="Formulario pacientes" to="/system/patientform" icon={<Person3Outlined />} selected={selected} />
+            
+           {/* <Item title="Citas" to="/system/calendar" icon={<CalendarTodayOutlined />} selected={selected} />*/}
 
-            <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Gráficos (WIP)</Typography>
+           {/* <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Gráficos (WIP)</Typography>  */}
           </Box>
         </Menu>
       </ProSidebar>

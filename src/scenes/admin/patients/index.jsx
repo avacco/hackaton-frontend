@@ -7,21 +7,25 @@ import { esES } from '@mui/x-data-grid/locales';
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../provider/AuthProvider";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Patients() {
 
   const [responsedata, setresponsedata] = useState()
   const { token } = useAuth();
+
+  const navigate = useNavigate();
   
-      // Popups
-      const [snackbar, setSnackbar] = useState(
-        {
-          open: false,
-          message: "",
-          severity: "success"
-        }
-      );
   
+  // Popups
+  const [snackbar, setSnackbar] = useState(
+    {
+      open: false,
+      message: "",
+      severity: "success"
+    }
+  );
+
 
   const route = import.meta.env.VITE_API_ROUTE;
 
@@ -33,20 +37,39 @@ export default function Patients() {
         .then(response => {
           setresponsedata(response.data)
         })
-        setSnackbar({
-          open: true,
-          message: "Error al pedir datos",
-          severity: "error"
+        .catch((error) => { 
+          setSnackbar({
+            open: true,
+            message: "Error al pedir datos",
+            severity: "error"
+          });
         })
   }, [])
+
+  const handleDelete = async (id) => {
+    await axios
+      .delete(`${route}/paciente/borrar/${id}`, {
+        headers: { Authorization: "Bearer "+token }})
+        .then(response => {
+          setSnackbar({
+            open: true,
+            message: "Paciente eliminado",
+            severity: "success"
+          });
+          setresponsedata(responsedata.filter((row) => row.id_persona !== id))
+        })
+      .catch((error) => {
+        setSnackbar({
+          open: true,
+          message: "Error al eliminar",
+          severity: "error"
+        });
+      })
+  }
   
   // Control de columnas, el field corresponde al nombre de dato al que correspondera la columna
   // Todos los demas parametros son para modificar aspectos de la columna, como el nombre, alineamiento, clases, etc.
   const columns = [
-    {
-      field: "id_persona", 
-      headerName: "ID"
-    },
     {
       field: "nombre", 
       headerName: "Nombre", 
@@ -87,11 +110,11 @@ export default function Patients() {
       field: "obra_social", 
       headerName: "Obra social", 
       flex: 1,
-      renderCell: ({row: {obra_social}}) => { 
+      renderCell: ({row: {obraSocial}}) => { 
         return ( 
         <>
-          {obra_social === true && <Typography pt="16px" color="si">Si</Typography>}
-          {obra_social === false && <Typography pt="16px" color="red">No</Typography>}
+          {obraSocial === true && <Typography pt="16px" color="si">Si</Typography>}
+          {obraSocial === false && <Typography pt="16px" color="red">No</Typography>}
         </>
         ) 
       },
@@ -100,11 +123,11 @@ export default function Patients() {
       field: "actions", 
       headerName: "Acciones", 
       flex: 1, 
-      renderCell: () => { 
+      renderCell: ({ row: { id_persona }}) => { 
         return ( 
           <Stack direction="row" spacing={1} mt="15px">
-            <Button variant="outlined" color="warning" size="small" ><EditOutlined/> </Button>
-            <Button variant="outlined" color="error"  size="small"><DeleteOutlineOutlined/> </Button>
+            <Button variant="outlined" color="warning" size="small" onClick={ ()=> navigate("/system/patientform", { state: id_persona})} ><EditOutlined/> </Button>
+            <Button variant="outlined" color="error"  size="small" onClick={ () => handleDelete(id_persona) }><DeleteOutlineOutlined/> </Button>
           </Stack>
         ) 
       },

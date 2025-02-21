@@ -1,33 +1,32 @@
-import { Alert, Box, Button, Card, CircularProgress, IconButton, InputAdornment, Snackbar, TextField, Typography } from "@mui/material"
-import { Formik } from "formik"
+import { Alert, Box, Button, Card, Checkbox, CircularProgress, FormControlLabel, Snackbar, TextField, Typography } from "@mui/material"
+import { Field, Formik } from "formik"
 import * as yup from "yup"
 import Header from "../../../components/Header"
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAuth } from "../../../provider/AuthProvider";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
-import { VisibilityOffOutlined, VisibilityOutlined } from "@mui/icons-material";
+import { useLocation } from "react-router-dom";  
 
-export default function AdminForm() {
+export default function PatientForm() {
   const isNonMobile = useMediaQuery("(min-width:600px)");
 
   const { token } = useAuth();
   const route = import.meta.env.VITE_API_ROUTE;
+
+  const [obraSocial, setObraSocial] = useState(false) 
  
   // Valores iniciales para campos de formulario
   const [initialValues, setInitialValues] = useState({
     id_persona: "",
-    nombre: "",
-    apellido: "",
-    dni: "",
-    fechaNac: "",
-    email: "",
-    telefono: "",
-    direccion: "",
-    username: "",
-    password: "",
-    rol: "",
+    nombre: "Mauricio",
+    apellido: "Velasquez",
+    dni: "786746234",
+    fechaNac: "2011-10-01",
+    email: "correo@hotmail.com",
+    telefono: "777212312",
+    direccion: "Pasaje Pintores 321",
+    obraSocial: true,
   });
 
   // Define la logica de validacion para los campos
@@ -39,14 +38,10 @@ export default function AdminForm() {
     email: yup.string().email("Correo inválido").required("Requerido"),
     telefono: yup.string().required("Requerido"),
     direccion: yup.string().required("Requerido"),
-    username: yup.string().required("Requerido"),
-    password: yup.string().required("Requerido"),
-    rol: yup.string().required("Requerido"),
   })
 
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  
+
   // Popups
   const [snackbar, setSnackbar] = useState(
     {
@@ -62,10 +57,9 @@ export default function AdminForm() {
 
   useEffect(() => {
     if(state) {
+      console.log(state)
       axios
-        .get(`${route}/personal/traer/${state}`,
-          { headers: { Authorization: "Bearer "+token }
-        },)
+        .get(`${route}/paciente/traer/${state}`)
         .then(response => {
 
           const data = response.data;
@@ -79,9 +73,7 @@ export default function AdminForm() {
             email: data.email,
             telefono: data.telefono,
             direccion: data.direccion,
-            username: data.username,
-            password: "", // No se debe recibir la contraseña
-            rol: data.rol,
+            obraSocial: data.obraSocial,
           })
         },
       )
@@ -95,28 +87,27 @@ export default function AdminForm() {
     setLoading(true)
     console.log(values)
     await axios 
-              .post(`${route}/personal/crear`, values, {
-                headers: { Authorization: "Bearer "+token }
-              },)
+              .post(`${route}/paciente/crear`, values)
               .then((response) => {
                   setSnackbar({
                     open: true,
-                    message: state ? "Personal editado" : "Peronal administrativo creado",
+                    message: state ? "Datos de paciente editados" : "Paciente registrado",
                     severity: "success"
                   });         
             }).catch((error) => {
                 setSnackbar({
                   open: true,
-                  message: "Error al intentar crear personal.",
+                  message: "Error al intentar registrar paciente.",
                   severity: "error"
                 });
+                console.log(error)
             }).finally(setLoading(false))
 
   };
 
   return (
     <Box m="20px">
-      <Header title="Crear perfil de empleado" subtitle="Formulario de inscripción" />
+      <Header title="Crear perfil de paciente" subtitle="Formulario de registro" />
       <Card sx={{pb:4, pt:2, px:2, m:2}}>
       <Typography variant="h4" color="green" mb={4}>Datos</Typography>
       <Formik 
@@ -230,64 +221,17 @@ export default function AdminForm() {
                 helperText={touched.direccion && errors.direccion}
                 sx={{ gridColumn: "span 4" }}
              />
-              <TextField 
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Usuario"
-                onBlur={handleBlur}
+              <FormControlLabel 
                 onChange={handleChange}
-                value={values.username}
-                name="username"
-                error={!!touched.username && !!errors.username} 
-                helperText={touched.username && errors.username}
-                sx={{ gridColumn: "span 2" }}
-             />
-
-             <TextField 
-                fullWidth
-                variant="filled"
-                type={showPassword ? "text" : "password"}
-                label="Contraseña"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.password}
-                name="password"
-                error={!!touched.password && !!errors.password} 
-                helperText={touched.password && errors.password}
-                sx={{ gridColumn: "span 2" }}
-                slotProps={{
-                  input: {
-                    endAdornment: 
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOffOutlined /> : <VisibilityOutlined />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                }}
-              
-             />
-              <TextField 
-                fullWidth
-                variant="filled"
-                type="text"
-                label="Rol"
-                onBlur={handleBlur}
-                onChange={handleChange}
-                value={values.rol}
-                name="rol"
-                error={!!touched.rol && !!errors.rol} 
-                helperText={touched.rol && errors.rol}
-                sx={{ gridColumn: "span 4" }}
-             />
+                name="obraSocial"
+                control={<Checkbox checked={values.obraSocial} />} 
+                label="¿Obra social?" 
+              />  
+            
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
-                {loading ? <CircularProgress size={24} color="inherit" /> : "Crear cuenta"}
+                {loading ? <CircularProgress size={24} color="inherit" /> : "Registrar paciente"}
               </Button>
             </Box>
           </form>

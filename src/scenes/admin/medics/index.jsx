@@ -70,10 +70,6 @@ export default function Employees() {
   // Todos los demas parametros son para modificar aspectos de la columna, como el nombre, alineamiento, clases, etc.
   const columns = [
     {
-      field: "id_persona", 
-      headerName: "ID"
-    },
-    {
       field: "nombre", 
       headerName: "Nombre", 
       flex: 1, 

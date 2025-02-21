@@ -68,10 +68,6 @@ export default function Services() {
   // Todos los demas parametros son para modificar aspectos de la columna, como el nombre, alineamiento, clases, etc.
   const columns = [
     {
-      field: "codigo_servicio", 
-      headerName: "ID"
-    },
-    {
       field: "nombre", 
       headerName: "Nombre servicio", 
       flex: 0.7, 

@@ -208,7 +208,7 @@ const Consultation = () => {
       .catch((error) => {
         setSnackbar({
           open: true,
-          message: "Error al crear paciente",
+          message: "Error al registrar paciente",
           severity: "error"
         });
       })
@@ -405,9 +405,11 @@ const Consultation = () => {
       <Grid2 container mt={4} spacing={4} display='flex'>
         {/* Espaciado */}
         <Grid2 size={{xs:12, md:2}}>
+        {/* debug
         <Box sx={{my:2}}>
-                <Button onClick={checkServices} variant="contained">check</Button>
-              </Box>
+          <Button onClick={checkServices} variant="contained">check</Button>
+        </Box>
+        */}
         </Grid2>
 
         <Grid2 size={{xs:12, md:8}}>
@@ -545,7 +547,12 @@ const Consultation = () => {
                         />
 
                         <Box>
-                          <FormControlLabel sx={{ml:3}} control={<Checkbox onClick={() => setObraSocial(!obraSocial)} value={values.obraSocial} checked={obraSocial} />} label="¿Obra social?" />
+                        <FormControlLabel 
+                          onChange={handleChange}
+                          name="obraSocial"
+                          control={<Checkbox checked={values.obraSocial} />} 
+                          label="¿Obra social?" 
+                        />
                         </Box>
                       
                         <Button

@@ -23,6 +23,7 @@ import PageWrapper from './scenes/client';
 import Calendar from './scenes/admin/calendar';
 import ServicesForm from './scenes/admin/serviceform';
 import Services from './scenes/admin/services';
+import PatientForm from './scenes/admin/patientform';
 
 function App() {
 
@@ -60,6 +61,7 @@ function App() {
                 <Route path="/system/invoices" element={<Invoices />} />
                 <Route path="/system/services" element={<Services />} />
                 <Route path="/system/adminform" element={<AdminForm />} />
+                <Route path="/system/patientform" element={<PatientForm />} />
                 <Route path="/system/form" element={<Form />} />
                 <Route path="/system/serviceform" element={<ServicesForm />} />
                 <Route path="/system/calendar" element={<Calendar />} />
