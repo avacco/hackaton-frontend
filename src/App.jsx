@@ -4,7 +4,6 @@ import { Route, Routes } from 'react-router-dom';
 import Dashboard from './scenes/admin/dashboard';
 import Employees from './scenes/admin/medics';
 import Patients from './scenes/admin/patients';
-import Invoices from './scenes/admin/invoices';
 import Form from './scenes/admin/medicform';
 import LoginForm from './scenes/login';
 import { useEffect, useState } from 'react';
@@ -24,6 +23,7 @@ import Calendar from './scenes/admin/calendar';
 import ServicesForm from './scenes/admin/serviceform';
 import Services from './scenes/admin/services';
 import PatientForm from './scenes/admin/patientform';
+import ServicePacks from './scenes/admin/servicepacks';
 
 function App() {
 
@@ -58,7 +58,7 @@ function App() {
                 <Route path="/system/administrators" element={<Administrators />} />
                 <Route path="/system/employees" element={<Employees />} />
                 <Route path="/system/patients" element={<Patients />} />
-                <Route path="/system/invoices" element={<Invoices />} />
+                <Route path="/system/servicepacks" element={<ServicePacks />} />
                 <Route path="/system/services" element={<Services />} />
                 <Route path="/system/adminform" element={<AdminForm />} />
                 <Route path="/system/patientform" element={<PatientForm />} />

@@ -205,6 +205,7 @@ const Consultation = () => {
         setAskForDNI(false)
         setServicesCard(true)
       })
+      setSettingPatient(false)
       .catch((error) => {
         setSnackbar({
           open: true,
@@ -281,7 +282,7 @@ const Consultation = () => {
     
     // Prepara datos de consulta medica
     let preparedConsultation = {
-      fechaConsulta: targetDay.format("YYYY-MM-DD"),
+      fechaTurno: targetDay.format("YYYY-MM-DD"),
       horaTurno: targetHour.format("HH:mm"),
       pagadoONo: "NO",
       medico: { id_persona: targetDoc.id_medico },
@@ -289,18 +290,19 @@ const Consultation = () => {
       servicio: { codigo_servicio: targetService },
     }
     // Añade datos de consulta medica a array de paquete de servicios
+    // Usa un let porque el state de react no se refresca a tiempo para el request. Y de todos modos despues se limpia.
     let request = [...servicePack, preparedConsultation]
 
 
     let data = {
-      id_sp: packId,
+      codigo_paquete: packId,
       consultas: request
     }
 
     console.log(data)
 
     axios
-      .post(`${route}/consultation/create`, data)
+      .post(`${route}/paquete_servicio/crear`, data)
       .then(response => {
         setSnackbar({
           open: true,
@@ -341,7 +343,7 @@ const Consultation = () => {
 
     // Prepara datos de consulta medica
     let preparedConsultation = {
-      fechaConsulta: targetDay.format("YYYY-MM-DD"),
+      fechaTurno: targetDay.format("YYYY-MM-DD"),
       horaTurno: targetHour.format("HH:mm"),
       pagadoONo: "NO",
       medico: { id_persona: targetDoc.id_medico },

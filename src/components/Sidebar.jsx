@@ -44,8 +44,8 @@ const Sidebar = () => {
         setSelected("Pacientes")
         break;
 
-      case "/system/invoices":
-        setSelected("Facturas")
+      case "/system/servicepacks":
+        setSelected("Paquetes")
         break;
         
       case "/system/services":
@@ -158,7 +158,7 @@ const Sidebar = () => {
             <Item title="Administradores" to="/system/administrators" icon={<AdminPanelSettingsOutlined />} selected={selected} />
             <Item title="Médicos" to="/system/employees" icon={<PeopleOutlineOutlined />} selected={selected} />
             <Item title="Pacientes" to="/system/patients" icon={<ContactsOutlined />} selected={selected} />
-            <Item title="Facturas" to="/system/invoices" icon={<ReceiptOutlined />} selected={selected} />
+            <Item title="Paquetes" to="/system/servicepacks" icon={<ReceiptOutlined />} selected={selected} />
             <Item title="Servicios" to="/system/services" icon={<MedicalServicesOutlined />} selected={selected} /> 
 
             <Typography variant='h6' color="gray" sx={{ m: "15px 0 5px 20px"}}>Paginas</Typography>
