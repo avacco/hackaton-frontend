@@ -577,13 +577,13 @@ const Consultation = () => {
           <Collapse orientation="vertical" in={Object.keys(patient).length > 0 ? true : false}>
             <Card>
               <CardContent>
-                <Typography>Nombre: {patient.nombre} {patient.apellido}</Typography>
-                <Typography>Cédula: {patient.dni}</Typography>
-                <Typography>Fecha de nacimiento: {patient.fechaNac}</Typography>
-                <Typography>Correo: {patient.email}</Typography>
-                <Typography>Contacto: {patient.telefono}</Typography>
-                <Typography>Direccion: {patient.direccion}</Typography>
-                <Typography>Obra social: {patient.obraSocial ? "Si" : "No"}</Typography>
+                <Typography><b>Nombre:</b> {patient.nombre} {patient.apellido}</Typography>
+                <Typography><b>Cédula:</b> {patient.dni}</Typography>
+                <Typography><b>Fecha de nacimiento:</b> {patient.fechaNac}</Typography>
+                <Typography><b>Correo:</b> {patient.email}</Typography>
+                <Typography><b>Contacto:</b> {patient.telefono}</Typography>
+                <Typography><b>Direccion:</b> {patient.direccion}</Typography>
+                <Typography><b>Obra social:</b> {patient.obraSocial ? "Si" : "No"}</Typography>
               </CardContent>
             </Card>
           </Collapse>

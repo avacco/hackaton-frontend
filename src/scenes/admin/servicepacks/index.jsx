@@ -24,7 +24,7 @@ const ServicePacks = () => {
 
   const cardStyle = {
     padding: "20px",
-    margin: "20px",
+    margin: "10px",
     backgroundColor: "#ffffff",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     flex: 1,
@@ -70,7 +70,7 @@ const ServicePacks = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 3 }}>
       <Header title="Paquetes" subtitle="Información de paquetes de servicios y sus requeridores" />
-      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
         <Card sx={cardStyle}>
           <Typography variant="h5" gutterBottom>Cédula de Paciente</Typography>
           <Box sx={{ display: "flex", gap: 1 }}>
@@ -93,7 +93,7 @@ const ServicePacks = () => {
           <Typography variant="h5" gutterBottom>Detalles</Typography>
           {selectedPack ? (
             <Box>
-              <Typography><b>ID:</b> {selectedPack.id_sp}</Typography>
+              <Typography><b>ID:</b> {selectedPack.codigo_paquete}</Typography>
               <Typography><b>Nombre Paciente:</b> {selectedPack.consultas[0].paciente.nombre} {selectedPack.consultas[0].paciente.apellido}</Typography>
 {/*           <Typography><b>Fecha Creación:</b> {}</Typography> */}
 {/*           <Typography><b>Monto total:</b> {}</Typography>    */}
@@ -101,7 +101,7 @@ const ServicePacks = () => {
               <Typography><b>Consultas realizadas:</b> </Typography>
               <ul>
                 {selectedPack.consultas.map((consul, index) => (
-                  <li key={index}>Sere una consulta clickeable</li>
+                  <li key={index}><a href="#">{consul.servicio.nombre} para la fecha {consul.fechaTurno}</a></li>
                 ))}
               </ul>
             </Box>
@@ -120,7 +120,7 @@ const ServicePacks = () => {
                 <TableCell>ID</TableCell>
                 <TableCell>Nombre paciente</TableCell>
         {/*     <TableCell>Fecha creación</TableCell>  */}
-        {/*     <TableCell>Monto total</TableCell>     */} 
+                <TableCell>Monto total</TableCell>     
         {/*     <TableCell>¿Pagado?</TableCell>        */} 
             <TableCell>Acciones</TableCell>
               </TableRow>
@@ -131,11 +131,11 @@ const ServicePacks = () => {
                   key={index}
                   sx={{ "&:nth-of-type(odd)": { backgroundColor: "#fafafa" } }}
                 >
-                  <TableCell>{pack.id_sp}</TableCell>
+                  <TableCell>{pack.codigo_paquete}</TableCell>
                   <TableCell>{pack.consultas[index].paciente.nombre} {pack.consultas[index].paciente.apellido}</TableCell>
                   {/* Para fecha de creacion, monto total y si es pagado o no */}
              {/*     <TableCell>{}</TableCell> */}
-             {/*     <TableCell>{}</TableCell> */}
+                     <TableCell>$ {pack.precioPaquete}</TableCell> 
              {/*     <TableCell>{}</TableCell> */}
                   <TableCell>
                     <Box sx={{ display: "flex", gap: 1 }}>
