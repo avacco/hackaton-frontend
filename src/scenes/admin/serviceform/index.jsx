@@ -69,7 +69,6 @@ export default function ServicesForm() {
 
   const handleFormSubmit = async (values) => {
     setLoading(true)
-    console.log(values)
     await axios 
               .post(`${route}/servicio_medico/crear`, values, {
                 headers: { Authorization: "Bearer "+token }

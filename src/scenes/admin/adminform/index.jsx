@@ -93,7 +93,6 @@ export default function AdminForm() {
 
   const handleFormSubmit = async (values) => {
     setLoading(true)
-    console.log(values)
     await axios 
               .post(`${route}/personal/crear`, values, {
                 headers: { Authorization: "Bearer "+token }

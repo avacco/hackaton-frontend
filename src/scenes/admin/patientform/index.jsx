@@ -57,7 +57,6 @@ export default function PatientForm() {
 
   useEffect(() => {
     if(state) {
-      console.log(state)
       axios
         .get(`${route}/paciente/traer/${state}`)
         .then(response => {
@@ -85,7 +84,6 @@ export default function PatientForm() {
 
   const handleFormSubmit = async (values) => {
     setLoading(true)
-    console.log(values)
     await axios 
               .post(`${route}/paciente/crear`, values)
               .then((response) => {
