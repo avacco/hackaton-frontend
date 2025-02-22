@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, CardContent, Collapse, Container, Grid2, Snackbar, TextField, Typography } from '@mui/material'
+import { Alert, Avatar, Box, Button, Card, CardContent, CardHeader, Collapse, Container, Grid2, Snackbar, TextField, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import GlobalCarousel from '../../../components/GlobalCarousel'
 import { Footer } from '../../../components/Footer'
@@ -8,10 +8,9 @@ import axios from 'axios'
 const Examinations = () => {
 
   const route = import.meta.env.VITE_API_ROUTE;
-  const [selectedButton, setselectedButton] = useState(99)
+  const [ts, setselectedButton] = useState(null)
   const [historyCard, setHistoryCard] = useState(false)
   const [historyData, setHistoryData] = useState([])
-  const [dataCardContents, setDataCardContents] = useState({})
   const [dataCard, setDataCard] = useState(false)
   const [loading, setLoading] = useState(false)
   const [snackbar, setSnackbar] = useState({
@@ -66,17 +65,7 @@ const Examinations = () => {
 
   // Llena con los datos extraidos de la consulta, segun el indice requerido.
   const openInfo = (index) => {
-
-    setselectedButton(index)
-
-    setDataCardContents({
-      nombreServicio: historyData[index].nombreServicio,
-      descripcionServicio: historyData[index].descripcionServicio,
-      paciente: historyData[index].nombrePaciente,
-      medico: historyData[index].nombreMedico,
-      pagado: historyData[index].pagadoONo,
-      monto: historyData[index].montoTotal,
-    })
+    setselectedButton(index+1)
   }
 
   return (
@@ -132,11 +121,11 @@ const Examinations = () => {
                   </Typography>
                   {historyData.map((item, index) => (
                     <Button 
-                      variant={selectedButton === index ? "contained" : "text"} 
+                      variant={ts === index+1 ? "contained" : "text"} 
                       onClick={() => openInfo(index)} 
                       mb={1} key={index}
                     >
-                      {item.fechaConsulta} - {item.horaConsulta}
+                      {item.fechaTurno} | {item.horaTurno}
                     </Button>
                   ))}
                 </CardContent>
@@ -146,23 +135,46 @@ const Examinations = () => {
 
           <Grid2 size={{xs:12, md:9}}>
             <Collapse orientation='vertical' in={dataCard}>
-              <Card sx={{display:'flex', justifyContent:'center'}}>
-                <CardContent>
-                <Typography mb={3} align="center" variant="h4" gutterBottom>Datos</Typography>
-                <Grid2 container spacing={4}>
-                  <Grid2 size={6}>
-                    <Typography > <b>Servicio:</b> {dataCardContents.nombreServicio} </Typography>
-                    <Typography > <b>Descripcion:</b> {dataCardContents.descripcionServicio} </Typography>
-                    <Typography > <b>Nombre del paciente:</b> {dataCardContents.paciente} </Typography>
+              <Card 
+                sx={{
+                  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                  flex: 1,
+                  minWidth: "300px"}}
+              >
+                <CardHeader
+                  avatar={<Avatar src="/juntosalud_mini.png" aria-label="recipe"></Avatar>}
+                  action={<Typography variant="h6" mr={2} color="textSecondary" gutterBottom>00/00/00</Typography>} 
+                  title={<Typography variant="h3" gutterBottom>Clínica JuntoSalud</Typography>}
+                
+                />
+                  {ts && (
+                  <Grid2 container m={2} p={2}>
+                    <Grid2 size={6}>
+                      <Typography variant="h5" gutterBottom><b>Médico asignado:</b> {historyData[ts-1].medico.nombre} {historyData[ts-1].medico.apellido}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Especialidad médico:</b> {historyData[ts-1].medico.especialidadMedica} </Typography>
+                      <Typography variant="h5" gutterBottom><b>Cédula medico:</b> {historyData[ts-1].medico.dni}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Fecha asignada:</b> {historyData[ts-1].fechaTurno}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Hora asignada:</b> {historyData[ts-1].horaTurno}</Typography>
+                    </Grid2>
+                    <Grid2 size={6}>
+                      <Typography variant="h5" gutterBottom><b>Paciente a tratar:</b> {historyData[ts-1].paciente.nombre} {historyData[ts-1].paciente.apellido}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Género al nacer:</b> dummy</Typography>
+                      <Typography variant="h5" gutterBottom><b>Cédula paciente:</b> {historyData[ts-1].paciente.dni}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Fecha de nacimiento:</b> {historyData[ts-1].paciente.fechaNac}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Contacto:</b> {historyData[ts-1].paciente.telefono}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Correo:</b> {historyData[ts-1].paciente.email}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Dirección:</b> {historyData[ts-1].paciente.direccion}</Typography>
+                    </Grid2>
+                    <Grid2 size={12}>
+                      <Typography variant="h5" gutterBottom><b>Servicio requerido:</b> {historyData[ts-1].servicio.nombre}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Descripcion del servicio:</b> {historyData[ts-1].servicio.descripcion}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Precio original del servicio:</b> {historyData[ts-1].servicio.precio}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Duración esperada del servicio:</b> {historyData[ts-1].servicio.duracion}</Typography>
+                      <Typography mt={5} variant="h4" gutterBottom><b>Pagado:</b> dummy</Typography>
+                    </Grid2>
                   </Grid2>
-                  <Grid2 size={6}>
-                    <Typography> <b>Atendido por:</b> {dataCardContents.medico} </Typography>
-                    <Typography> <b>Pagado:</b> {dataCardContents.pagado} </Typography>
-                    <Typography> <b>Monto:</b> ${dataCardContents.monto} </Typography>
-                  </Grid2>
-                </Grid2>
-                </CardContent>
-              </Card>
+                  )}
+              </Card> 
             </Collapse>
           </Grid2>
         </Grid2>

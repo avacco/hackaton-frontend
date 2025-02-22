@@ -6,12 +6,18 @@ Para utilizarlo necesitas del [backend](https://github.com/Luisezalazar/hackacod
 
 ## Inicio
 
-Antes de empezar debes crear un archivo .env y definir una variable con este nombre:
+Despues de clonar o descargar el proyecto, ejecuta:
+```bash
+npm install
+```
+En la carpeta raiz del proyecto.
+
+Antes de iniciar el proyecto debes crear un archivo .env y definir una variable con este nombre:
 
 ```bash
 VITE_API_ROUTE=http://localhost:8080
 ```
-(localhost:8080 es un ejemplo. Debe apuntar a la dirección donde tengas subido el backend.)
+(localhost:8080 es un ejemplo. Debe apuntar a la dirección donde tengas subido el backend).
 
 Hecho esto, inicia el proyecto con:
 

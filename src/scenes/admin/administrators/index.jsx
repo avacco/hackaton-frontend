@@ -69,10 +69,6 @@ export default function Administrators() {
   // Todos los demas parametros son para modificar aspectos de la columna, como el nombre, alineamiento, clases, etc.
   const columns = [
     {
-      field: "id_persona", 
-      headerName: "ID"
-    },
-    {
       field: "nombre", 
       headerName: "Nombre", 
       flex: 1, 
@@ -121,7 +117,7 @@ export default function Administrators() {
     {
       field: "actions", 
       headerName: "Acciones", 
-      flex: 1, 
+      flex: 2, 
       renderCell: ({ row: { id_persona }}) => { 
         return ( 
           <Stack direction="row" spacing={1} mt="15px">
