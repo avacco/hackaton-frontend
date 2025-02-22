@@ -276,7 +276,6 @@ const Consultation = () => {
 
   // Control de sexto paso (Creacion de consulta y envio)
   const handleConsultationSubmit = async () => {
-    if (loading) return;
 
     setLoading(true);
     
@@ -795,7 +794,7 @@ const Consultation = () => {
                 </Grid2>
               </Grid2>
               <Typography mb={2} variant="h5" color="textSecondary">Si desea añadir servicios adicionales, presione Añadir servicio adicional, de lo contrario, confirme el pedido.</Typography>
-                <Button sx={{mr:2}} variant="contained" color="primary" onClick={() => handleConsultationSubmit() }>Confirmar pedido</Button>
+                <Button disabled={loading} sx={{mr:2}} variant="contained" color="primary" onClick={() => handleConsultationSubmit() }>Confirmar pedido</Button>
                 <Button variant="outlined" color="info" onClick={() => handleAddService()}>Añadir servicio adicional</Button>
               </CardContent>
             </Card>

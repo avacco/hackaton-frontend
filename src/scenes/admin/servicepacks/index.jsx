@@ -58,8 +58,8 @@ const ServicePacks = () => {
   }
 
   const displayData = (target) => {
-    console.log(target);
-
+  // Limpia el target service antes de cambiar el pack
+    setTargetService(null)
     setSelectedPack(target);
 
   }
@@ -73,17 +73,17 @@ const ServicePacks = () => {
       <Header title="Paquetes" subtitle="Información de paquetes de servicios y sus requeridores" />
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
         <Card sx={cardStyle}>
-          <Typography variant="h5" gutterBottom>Cédula de Paciente</Typography>
+          <Typography variant="h5" gutterBottom>Cédula de Requeridor</Typography>
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
               fullWidth
-              placeholder="Ingrese la cédula del paciente"
+              placeholder="Ingrese la cédula del requeridor"
               variant="outlined"
               value=""
             />
           </Box>
           <Button sx={{mt: 2, mr:2}} variant="contained" onClick={handleFetch} disabled={loading} startIcon={loading ? <CircularProgress size={20} /> : <SearchOutlined />}>
-               Buscar por paciente
+               Buscar por requeridor
           </Button>
           <Button sx={{mt: 2}} variant="contained" color="info" onClick={fetchAllPacks} disabled={loading} startIcon={loading ? <CircularProgress size={20} /> : <SearchOutlined />}>
               Traer todos los paquetes
@@ -95,7 +95,7 @@ const ServicePacks = () => {
           {selectedPack ? (
             <Box>
               <Typography><b>ID paquete:</b> {selectedPack.codigo_paquete}</Typography>
-              <Typography><b>Nombre paciente:</b> {selectedPack.consultas[0].paciente.nombre} {selectedPack.consultas[0].paciente.apellido}</Typography>
+              <Typography><b>Nombre de requeridor:</b>dummy</Typography>
 {/*           <Typography><b>Fecha Creación:</b> {}</Typography> */}
               <Typography><b>Monto total:</b> $ {selectedPack.precioPaquete}</Typography>    
 {/*           <Typography><b>¿Pagado?:</b> {}</Typography>       */}
@@ -165,7 +165,7 @@ const ServicePacks = () => {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell>ID</TableCell>
-                <TableCell>Nombre paciente</TableCell>
+                <TableCell>Nombre requeridor</TableCell>
         {/*     <TableCell>Fecha creación</TableCell>  */}
                 <TableCell>Monto total</TableCell>     
         {/*     <TableCell>¿Pagado?</TableCell>        */} 
@@ -179,7 +179,7 @@ const ServicePacks = () => {
                   sx={{ "&:nth-of-type(odd)": { backgroundColor: "#fafafa" } }}
                 >
                   <TableCell>{pack.codigo_paquete}</TableCell>
-                  <TableCell>{pack.consultas[index].paciente.nombre} {pack.consultas[index].paciente.apellido}</TableCell>
+                  <TableCell>dummy</TableCell>
                   {/* Para fecha de creacion, monto total y si es pagado o no */}
              {/*     <TableCell>{}</TableCell> */}
                      <TableCell>$ {pack.precioPaquete}</TableCell> 
