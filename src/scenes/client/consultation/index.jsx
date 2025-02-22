@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, Collapse, FormControlLabel, Checkbox, Fade, Modal, Backdrop, CardHeader, IconButton } from "@mui/material";
+import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, Collapse, FormControlLabel, Checkbox, Fade, Modal, Backdrop, CardHeader, IconButton, Avatar } from "@mui/material";
 import { Footer } from "../../../components/Footer";
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import * as yup from 'yup';
@@ -223,7 +223,7 @@ const Consultation = () => {
     setDoctorDropdown(true); // abre dropdown de doctor, cierra los demas si estaban abiertos
 
     axios
-        .get(`${route}/medico/servicio_con_medicos/${e.target.value}`)
+        .get(`${route}/medico/servicio_con_medicos/${e.target.value.codigo_servicio}`)
         .then(response => {
           setDocs(response.data.nombresMedicos);
         })
@@ -287,7 +287,7 @@ const Consultation = () => {
       pagadoONo: "NO",
       medico: { id_persona: targetDoc.id_medico },
       paciente: { id_persona: patient.id_persona },
-      servicio: { codigo_servicio: targetService },
+      servicio: { codigo_servicio: targetService.codigo_servicio },
     }
     // Añade datos de consulta medica a array de paquete de servicios
     // Usa un let porque el state de react no se refresca a tiempo para el request. Y de todos modos despues se limpia.
@@ -348,7 +348,7 @@ const Consultation = () => {
       pagadoONo: "NO",
       medico: { id_persona: targetDoc.id_medico },
       paciente: { id_persona: patient.id_persona },
-      servicio: { codigo_servicio: targetService },
+      servicio: { codigo_servicio: targetService.codigo_servicio },
     }
     // Añade datos de consulta medica a array de paquete de servicios
     setServicePack([...servicePack, preparedConsultation])
@@ -573,17 +573,43 @@ const Consultation = () => {
               </CardContent>
             </Card>
           </Collapse>
-          {/* Info de paciente */}
           <Collapse orientation="vertical" in={Object.keys(patient).length > 0 ? true : false}>
             <Card>
-              <CardContent>
-                <Typography><b>Nombre:</b> {patient.nombre} {patient.apellido}</Typography>
-                <Typography><b>Cédula:</b> {patient.dni}</Typography>
-                <Typography><b>Fecha de nacimiento:</b> {patient.fechaNac}</Typography>
-                <Typography><b>Correo:</b> {patient.email}</Typography>
-                <Typography><b>Contacto:</b> {patient.telefono}</Typography>
-                <Typography><b>Direccion:</b> {patient.direccion}</Typography>
-                <Typography><b>Obra social:</b> {patient.obraSocial ? "Si" : "No"}</Typography>
+            <CardHeader 
+                sx={{m:1}}
+                action={<Typography color="textSecondary">{""+dayjs().format('DD/MM/YYYY')}</Typography>} 
+                avatar={<Avatar src="/juntosalud_mini.png" aria-label="recipe"></Avatar>}
+                title={<Typography variant="h3" gutterBottom>Clínica JuntoSalud</Typography>}
+              />
+              <CardContent sx={{m:2}}>
+              <Grid2 container spacing={6}>
+                <Grid2 size={{sm:12, md:6}}>
+                {/* Info de paciente */}
+                  <Typography variant="h4" my={1}>Detalles del paciente</Typography>
+                  <Typography><b>Nombre:</b> {patient.nombre} {patient.apellido}</Typography>
+                  <Typography><b>Cédula:</b> {patient.dni}</Typography>
+                  <Typography><b>Fecha de nacimiento:</b> {patient.fechaNac}</Typography>
+                  <Typography><b>Correo:</b> {patient.email}</Typography>
+                  <Typography><b>Contacto:</b> {patient.telefono}</Typography>
+                  <Typography><b>Dirección:</b> {patient.direccion}</Typography>
+                  <Typography><b>Obra social:</b> {patient.obraSocial ? "Si" : "No"}</Typography>
+                </Grid2>
+                <Grid2 size={{sm:12, md:6}}>
+              {/* Info de servicio */}
+              {targetService && (
+                  <>
+                    <Typography variant="h4" my={1}>Detalles de la consulta</Typography>
+                    <Typography><b>Servicio:</b> {targetService.nombre}</Typography>
+                    <Typography><b>Descripción:</b> {targetService.descripcion}</Typography>
+                    <Typography><b>Precio:</b> $ {targetService.precio}</Typography>
+                    <Typography><b>Duración estimada:</b> {targetService.duracion}</Typography>
+                    <Typography><b>Fecha:</b> {""+targetDay.format('DD/MM/YYYY')}</Typography>
+                    <Typography><b>Hora:</b> {""+targetHour.format('HH:mm')}</Typography>
+                    {targetDoc && (<Typography><b>Médico tratante:</b> {targetDoc.nombre} {targetDoc.apellido}</Typography>)}
+                  </>
+              )}    
+                </Grid2>
+              </Grid2>
               </CardContent>
             </Card>
           </Collapse>
@@ -612,7 +638,7 @@ const Consultation = () => {
                     onChange={handleServiceSelection}
                   >
                     {services.map((item) => (
-                      <MenuItem key={item.codigo_servicio} value={item.codigo_servicio}>{item.nombre}</MenuItem>
+                      <MenuItem key={item.codigo_servicio} value={item}>{item.nombre} - $ {item.precio}</MenuItem>
                     ))}
 
                   </Select>
@@ -725,7 +751,7 @@ const Consultation = () => {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 400,
+              width: 420,
               bgcolor: 'background.paper',
               border: '2px solid #000',
               boxShadow: 24,
@@ -735,31 +761,41 @@ const Consultation = () => {
             <Card>
               <CardHeader 
                 action={<IconButton onClick={()=> handleClose()}><Close/></IconButton>} 
-                title="Confirmar pedido"
+                avatar={<Avatar src="/juntosalud_mini.png" aria-label="recipe"></Avatar>}
+               title={<Typography variant="h3" gutterBottom>Clínica JuntoSalud</Typography>}
               />
-              <CardContent>
-              <Typography mb={2}>
-                Por favor revise los detalles de su pedido.
-              </Typography>
-
-              <Typography><b>Medico asignado:</b> {targetDoc.nombre} {targetDoc.apellido}</Typography>
-              <Typography><b>Dia de cita:</b> {targetDay.format("DD/MM/YYYY")}</Typography>
-              <Typography><b>Hora de cita:</b> {targetHour.format("HH:mm")}</Typography>
-              <Typography><b>Paciente citado:</b> {patient.nombre} {patient.apellido}</Typography>
-
-              <Typography sx={{color: 'GrayText', fontSize: 14}} mt={2}>
-              Si requiere de servicios adicionales, presione en Añadir servicio adicional.
-              </Typography>
-
-              <Box sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "12px",
-                marginTop: "24px"
-              }}>
-
-              </Box>
-                <Button variant="contained" color="primary" onClick={() => handleConsultationSubmit() }>Confirmar pedido</Button>
+              <CardContent sx={{m:2}}>
+              <Typography variant="h4" color="textSecondary">Por favor, revise que la información sea correcta. </Typography>
+              <Grid2 mb={3} container spacing={6}>
+                <Grid2 size={{sm:12, md:6}}>
+                {/* Info de paciente */}
+                  <Typography variant="h4" my={1}>Detalles del paciente</Typography>
+                  <Typography><b>Nombre:</b> {patient.nombre} {patient.apellido}</Typography>
+                  <Typography><b>Cédula:</b> {patient.dni}</Typography>
+                  <Typography><b>Fecha de nacimiento:</b> {patient.fechaNac}</Typography>
+                  <Typography><b>Correo:</b> {patient.email}</Typography>
+                  <Typography><b>Contacto:</b> {patient.telefono}</Typography>
+                  <Typography><b>Dirección:</b> {patient.direccion}</Typography>
+                  <Typography><b>Obra social:</b> {patient.obraSocial ? "Si" : "No"}</Typography>
+                </Grid2>
+                <Grid2 size={{sm:12, md:6}}>
+              {/* Info de servicio */}
+              {targetService && (
+                  <>
+                    <Typography variant="h4" my={1}>Detalles de la consulta</Typography>
+                    <Typography><b>Servicio:</b> {targetService.nombre}</Typography>
+                    <Typography><b>Descripción:</b> {targetService.descripcion}</Typography>
+                    <Typography><b>Precio:</b> $ {targetService.precio}</Typography>
+                    <Typography><b>Duración estimada:</b> {targetService.duracion}</Typography>
+                    <Typography><b>Fecha:</b> {""+targetDay.format('DD/MM/YYYY')}</Typography>
+                    <Typography><b>Hora:</b> {""+targetHour.format('HH:mm')}</Typography>
+                    {targetDoc && (<Typography><b>Médico tratante:</b> {targetDoc.nombre} {targetDoc.apellido}</Typography>)}
+                  </>
+              )}    
+                </Grid2>
+              </Grid2>
+              <Typography mb={2} variant="h5" color="textSecondary">Si desea añadir servicios adicionales, presione Añadir servicio adicional, de lo contrario, confirme el pedido.</Typography>
+                <Button sx={{mr:2}} variant="contained" color="primary" onClick={() => handleConsultationSubmit() }>Confirmar pedido</Button>
                 <Button variant="outlined" color="info" onClick={() => handleAddService()}>Añadir servicio adicional</Button>
               </CardContent>
             </Card>
