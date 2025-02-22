@@ -20,7 +20,7 @@ const Examinations = () => {
   });
 
   const initialValues = {
-    dni: "38272561",
+    dni: "",
   }
 
   const iconBox ={display: "flex",  justifyContent: "center",  marginBottom: "1rem",  gap: "1rem"}

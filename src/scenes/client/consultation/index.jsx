@@ -193,7 +193,7 @@ const Consultation = () => {
 
     setLoading(true);
     
-    axios
+   await axios
       .post(`${route}/paciente/crear`, values)
       .then(response => {
         setSnackbar({
@@ -222,7 +222,7 @@ const Consultation = () => {
    const handleServiceSelection = async (e) => {
     setDoctorDropdown(true); // abre dropdown de doctor, cierra los demas si estaban abiertos
 
-    axios
+   await axios
         .get(`${route}/medico/servicio_con_medicos/${e.target.value.codigo_servicio}`)
         .then(response => {
           setDocs(response.data.nombresMedicos);
@@ -298,9 +298,7 @@ const Consultation = () => {
       consultas: request
     }
 
-    console.log(data)
-
-    axios
+   await axios
       .post(`${route}/paquete_servicio/crear`, data)
       .then(response => {
         setSnackbar({
