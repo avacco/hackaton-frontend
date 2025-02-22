@@ -400,6 +400,8 @@ const Consultation = () => {
     <>
     <GlobalCarousel />
     <Container maxWidth="xl" sx={{ py: 8 }}>
+      <Typography variant="h3" textAlign="center" mb={2}>Agendar consultas</Typography>
+      <Typography mx={10} variant="h4" textAlign={"center"}>Estimado cliente, desde este portal puede pedir una cita con uno de nuestros médicos. Escriba la cédula del paciente y rellene el formulario si no ha sido registrado antes. Una vez hecho, podrá elegir uno de nuestros servicios y concertar una cita.</Typography>
   {/* Seccion paciente */}
       <Grid2 container mt={4} spacing={4} display='flex'>
         {/* Espaciado */}

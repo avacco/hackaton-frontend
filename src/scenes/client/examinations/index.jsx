@@ -72,11 +72,14 @@ const Examinations = () => {
     <>
     <GlobalCarousel />
     <Container>
+            <Typography mt={6} variant="h3" textAlign="center" mb={2}>Consultar historial de paciente</Typography>
+            <Typography mx={10} variant="h4" textAlign={"center"}>Estimado cliente, desde este portal puede pedir el historial de consultas agendadas, tanto pasadas como futuras. Escriba la cédula del paciente y presione en una de las fechas que aparecerán.</Typography>
+      
       <Grid2 my={10} size={{xs:12, lg:4}}>
           <Card>
             <CardContent>
               <Typography align='center' variant="h4" gutterBottom>
-                Consultar historial de paciente
+                Ingrese cédula o DNI del paciente
               </Typography>
               <Formik
                   onSubmit={handleFormSubmit}

@@ -10,7 +10,7 @@ export default function Topbar() {
   // Items de menu de navegacion, usado por el topbar normal y el de movil.
   const topbarItems = [
     { title: "Inicio", nav: "/" },
-    { title: "Realizar una consulta ", nav: "/consultation" },
+    { title: "Agendar una consulta ", nav: "/consultation" },
     { title: "Historial de paciente", nav: "/examinations" },
     { title: "Nosotros", nav: "/about" },
     { title: "Contáctanos ", nav: "/contact" },
