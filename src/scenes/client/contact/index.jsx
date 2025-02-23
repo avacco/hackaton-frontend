@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, IconButton } from "@mui/material";
 import { BsTelephone, BsEnvelope, BsClock, BsGeoAlt, BsTwitterX } from "react-icons/bs";
 import { Footer } from "../../../components/Footer";
-import * as yup from 'yup';
 import { Formik } from "formik";
 import { FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
+import * as yup from 'yup';
 
 
 const Contact = () => {
