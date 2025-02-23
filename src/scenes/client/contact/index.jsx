@@ -4,7 +4,7 @@ import { BsTelephone, BsEnvelope, BsClock, BsGeoAlt, BsTwitterX } from "react-ic
 import { Footer } from "../../../components/Footer";
 import { Formik } from "formik";
 import { FaFacebook, FaInstagram, FaWhatsapp } from "react-icons/fa";
-import * as yup from 'yup';
+//import * as yup from 'yup';
 
 
 const Contact = () => {
@@ -18,7 +18,7 @@ const Contact = () => {
     reason: "",
     message: "",
   }
-  
+ /* 
   const formSchema = yup.object().shape({
     firstName: yup.string().required("Requerido"),
     lastName: yup.string().required("Requerido"),
@@ -27,7 +27,7 @@ const Contact = () => {
     reason: yup.string().required("Requerido"),
     message: yup.string().required("Requerido")
   })
-
+*/
   const iconBox ={display: "flex",  alignItems: "center",  marginBottom: "1rem",  gap: "1rem"}
 
   const [loading, setLoading] = useState(false);
@@ -81,7 +81,7 @@ const Contact = () => {
               <Formik
                 onSubmit={handleFormSubmit}
                 initialValues={initialValues}
-                validationSchema={formSchema}
+ //               validationSchema={formSchema}
               >
               {({ values, errors, touched, handleChange, handleSubmit }) => (
                 <form onSubmit={handleSubmit}>
