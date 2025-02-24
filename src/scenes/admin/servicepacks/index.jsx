@@ -4,9 +4,10 @@ import Header from "../../../components/Header";
 import { DeleteOutlineOutlined, EditOutlined, SearchOutlined } from "@mui/icons-material";
 import axios from "axios";
 import { useAuth } from "../../../provider/AuthProvider";
+import { Formik } from "formik";
+import * as yup from 'yup';
 
 const ServicePacks = () => {
-  const [employeeId, setEmployeeId] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedPack, setSelectedPack] = useState(null);
   const [responsedata, setresponsedata] = useState([])
@@ -22,6 +23,12 @@ const ServicePacks = () => {
       severity: "success"
     }
   );
+
+  const initialValues = {dni: ""}
+
+  const schema = yup.object().shape({
+    dni: yup.string().required("Requerido"),
+  })
 
   const cardStyle = {
     padding: "20px",
@@ -40,7 +47,7 @@ const ServicePacks = () => {
 
     setLoading(true)
 
-    axios
+    await axios
       .get(`${route}/paquete_servicio/traer`,{
         headers: { Authorization: "Bearer "+token }
       })
@@ -53,6 +60,7 @@ const ServicePacks = () => {
           message: "Error al pedir datos",
           severity: "error"
         });
+        console.log(error)
       })
       .finally(setLoading(false))
   }
@@ -64,39 +72,68 @@ const ServicePacks = () => {
 
   }
 
-  const handleFetch = () => {
+  const handleFormSubmit = async (values) => {
     setLoading(true);
+
+    await axios
+    .get(`${route}/paquete_servicio/pedir/${values.dni}`,{
+      headers: { Authorization: "Bearer "+token }
+    })
+    .then(response => {
+      setresponsedata(response.data)
+    })
+    .catch((error) => { 
+      setSnackbar({
+        open: true,
+        message: "Error al pedir datos",
+        severity: "error"
+      });
+    })
+    .finally(setLoading(false))
+
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, padding: 3 }}>
       <Header title="Paquetes" subtitle="Información de paquetes de servicios y sus requeridores" />
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-        <Card sx={cardStyle}>
-          <Typography variant="h5" gutterBottom>Cédula de Requeridor</Typography>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <TextField
-              fullWidth
-              placeholder="Ingrese la cédula del requeridor"
-              variant="outlined"
-              value=""
-            />
-          </Box>
-          <Button sx={{mt: 2, mr:2}} variant="contained" onClick={handleFetch} disabled={loading} startIcon={loading ? <CircularProgress size={20} /> : <SearchOutlined />}>
-               Buscar por requeridor
-          </Button>
-          <Button sx={{mt: 2}} variant="contained" color="info" onClick={fetchAllPacks} disabled={loading} startIcon={loading ? <CircularProgress size={20} /> : <SearchOutlined />}>
-              Traer todos los paquetes
-          </Button>
-        </Card>
-
+        <Formik 
+          onSubmit={handleFormSubmit} 
+          initialValues={initialValues} 
+          validationSchema={schema}
+        >
+          {({ values, handleSubmit, handleChange }) => (
+          <form onSubmit={handleSubmit}>
+            <Card sx={cardStyle}>
+              <Typography variant="h5" gutterBottom>Cédula de Requeridor</Typography>
+              <Box sx={{ display: "flex", gap: 1 }}>
+                <TextField
+                  fullWidth
+                  placeholder="Ingrese la cédula del requeridor"
+                  variant="outlined"
+                  name="dni"
+                  onChange={handleChange}
+                  value={values.dni}
+                />
+              </Box>
+              <Button sx={{mt: 2, mr:2}} variant="contained" type="submit" disabled={loading} startIcon={loading ? <CircularProgress size={20} /> : <SearchOutlined />}>
+                  Buscar por requeridor
+              </Button>
+              <Button sx={{mt: 2}} variant="contained" color="info" onClick={fetchAllPacks} disabled={loading} startIcon={loading ? <CircularProgress size={20} /> : <SearchOutlined />}>
+                  Traer todos los paquetes
+              </Button>
+            </Card>
+          </form>
+          )}
+        </Formik>
         <Card sx={cardStyle}>
           <Typography variant="h5" gutterBottom>Detalles</Typography>
           {selectedPack ? (
             <Box>
               <Typography><b>ID paquete:</b> {selectedPack.codigo_paquete}</Typography>
-              <Typography><b>Nombre de requeridor:</b>dummy</Typography>
-{/*           <Typography><b>Fecha Creación:</b> {}</Typography> */}
+              <Typography><b>Nombre de solicitante:</b> {selectedPack.nombreSolicitante}</Typography>
+              <Typography><b>Cédula de solicitante:</b> {selectedPack.dniSolicitante}</Typography>
+              <Typography><b>Fecha Creación:</b> {selectedPack.fechaCreacion}</Typography> 
               <Typography><b>Monto total:</b> $ {selectedPack.precioPaquete}</Typography>    
 {/*           <Typography><b>¿Pagado?:</b> {}</Typography>       */}
               <Typography><b>Consultas realizadas:</b> </Typography>
@@ -124,7 +161,7 @@ const ServicePacks = () => {
         >
           <CardHeader
             avatar={<Avatar src="/juntosalud_mini.png" aria-label="recipe"></Avatar>}
-            action={<Typography variant="h6" mr={2} color="textSecondary" gutterBottom>00/00/00</Typography>} 
+            action={<Typography variant="h6" mr={2} color="textSecondary" gutterBottom>{selectedPack.fechaCreacion}</Typography>} 
             title={<Typography variant="h3" gutterBottom>Clínica JuntoSalud</Typography>}
           
           />
@@ -139,7 +176,7 @@ const ServicePacks = () => {
             </Grid2>
             <Grid2 size={6}>
               <Typography variant="h5" gutterBottom><b>Paciente a tratar:</b> {selectedPack.consultas[ts-1].paciente.nombre} {selectedPack.consultas[ts-1].paciente.apellido}</Typography>
-              <Typography variant="h5" gutterBottom><b>Género al nacer:</b> dummy</Typography>
+              <Typography variant="h5" gutterBottom><b>Género al nacer:</b> {selectedPack.consultas[ts-1].paciente.genero}</Typography>
               <Typography variant="h5" gutterBottom><b>Cédula paciente:</b> {selectedPack.consultas[ts-1].paciente.dni}</Typography>
               <Typography variant="h5" gutterBottom><b>Fecha de nacimiento:</b> {selectedPack.consultas[ts-1].paciente.fechaNac}</Typography>
               <Typography variant="h5" gutterBottom><b>Contacto:</b> {selectedPack.consultas[ts-1].paciente.telefono}</Typography>
@@ -165,8 +202,8 @@ const ServicePacks = () => {
             <TableHead>
               <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                 <TableCell>ID</TableCell>
-                <TableCell>Nombre requeridor</TableCell>
-        {/*     <TableCell>Fecha creación</TableCell>  */}
+                <TableCell>Nombre solicitante</TableCell>
+                <TableCell>Fecha creación</TableCell>  
                 <TableCell>Monto total</TableCell>     
         {/*     <TableCell>¿Pagado?</TableCell>        */} 
             <TableCell>Acciones</TableCell>
@@ -179,18 +216,15 @@ const ServicePacks = () => {
                   sx={{ "&:nth-of-type(odd)": { backgroundColor: "#fafafa" } }}
                 >
                   <TableCell>{pack.codigo_paquete}</TableCell>
-                  <TableCell>dummy</TableCell>
+                  <TableCell>{pack.nombreSolicitante}</TableCell>
                   {/* Para fecha de creacion, monto total y si es pagado o no */}
-             {/*     <TableCell>{}</TableCell> */}
-                     <TableCell>$ {pack.precioPaquete}</TableCell> 
+                  <TableCell>{pack.fechaCreacion}</TableCell> 
+                  <TableCell>$ {pack.precioPaquete}</TableCell> 
              {/*     <TableCell>{}</TableCell> */}
                   <TableCell>
                     <Box sx={{ display: "flex", gap: 1 }}>
                       <Tooltip title="Inspeccionar">
                         <Button size="small" variant="outlined" onClick={() => displayData(pack)} ><SearchOutlined /></Button>
-                      </Tooltip>
-                      <Tooltip title="Editar">
-                        <Button variant="outlined" color="warning" size="small" ><EditOutlined/> </Button>
                       </Tooltip>
                       <Tooltip title="Eliminar">
                         <Button variant="outlined" color="error"  size="small" ><DeleteOutlineOutlined/> </Button>

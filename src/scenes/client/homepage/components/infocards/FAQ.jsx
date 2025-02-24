@@ -9,7 +9,7 @@ export default function FAQ() {
   const faq = [
     {
       summary: "¿Cuáles son los horarios de atención de la clínica?",
-      details: "Nuestra clínica está abierta de lunes a viernes de 7:00 a 20:00 y los sábados de 7:00 a 16:00. Estamos cerrados los domingos y feriados."
+      details: "Nuestra clínica está abierta de lunes a viernes de 8:00 a 20:00 y los sábados de 7:00 a 16:00. Estamos cerrados los domingos y feriados."
     },
     {
       summary: "¿Necesito una cita previa para ser atendido?",

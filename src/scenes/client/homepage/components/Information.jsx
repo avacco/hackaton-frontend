@@ -1,5 +1,5 @@
 import { Box, Button, Card, CardContent, CardHeader, CardMedia, Collapse, Container, Grid2, IconButton, Typography, useTheme } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FaBed, FaCalendarCheck, FaPrescription, FaQuestion } from 'react-icons/fa'
 import FAQ from './infocards/FAQ'
 import { Close } from '@mui/icons-material'
@@ -9,6 +9,10 @@ import AdmissionRules from './infocards/AdmissionRules'
 const Information = () => {
 
   const theme = useTheme();
+
+    // Muestra una carta al cargar la pagina
+    useEffect(() => {showCard("Preguntas frecuentes")}, [])
+    
 
     // Estados para la card de informacion
     const [infoCardState, setInfoCardState] = useState(false)
@@ -27,7 +31,7 @@ const Information = () => {
           break;
 
         case "Indicaciones para cirugía":
-          setInfoCardTitle(<Typography variant='h3'>INDICACIONES PREVIAS A SU CIRUGÍA</Typography>)
+          setInfoCardTitle(<Typography variant='h2'>INDICACIONES PREVIAS A SU CIRUGÍA</Typography>)
           setInfoCardBody(<Surgery />)
           setInfoCardState(true)
           setCardImage("https://images.pexels.com/photos/4421496/pexels-photo-4421496.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1")
@@ -41,7 +45,7 @@ const Information = () => {
           break;
 
         case "Preguntas frecuentes":
-          setInfoCardTitle(<Typography variant='h2'>Preguntas frecuentes</Typography>)
+          setInfoCardTitle(<Typography variant='h2'>PREGUNTAS FRECUENTES</Typography>)
           setInfoCardBody(<FAQ />)
           setInfoCardState(true)
           setCardImage("https://images.pexels.com/photos/5428830/pexels-photo-5428830.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1")
@@ -74,7 +78,7 @@ const Information = () => {
           <Button 
             key={index}
             sx={{minWidth: '100px', minHeight: '50px', fontSize:'large'}} 
-            variant="text" 
+            variant="outlined" 
             startIcon={info.icon}
             onClick={() => showCard(info.title)}
           >

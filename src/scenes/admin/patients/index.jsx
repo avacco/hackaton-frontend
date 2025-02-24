@@ -107,6 +107,11 @@ export default function Patients() {
       flex: 1
     },
     {
+      field: "genero", 
+      headerName: "Sexo", 
+      flex: 1
+    },
+    {
       field: "obra_social", 
       headerName: "Obra social", 
       flex: 1,

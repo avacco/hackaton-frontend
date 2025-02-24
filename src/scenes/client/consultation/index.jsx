@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, Collapse, FormControlLabel, Checkbox, Fade, Modal, Backdrop, CardHeader, IconButton, Avatar } from "@mui/material";
+import { Card,  CardContent,  TextField,  Button,  Typography,  Select,  MenuItem,  FormControl,  InputLabel,  Container,  Box,  Alert,  Snackbar, Grid2, Collapse, FormControlLabel, Checkbox, Fade, Modal, Backdrop, CardHeader, IconButton, Avatar, FormLabel, RadioGroup, Radio, Tooltip, Chip, Badge } from "@mui/material";
 import { Footer } from "../../../components/Footer";
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import * as yup from 'yup';
@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import es from 'dayjs/locale/es';
 import GlobalCarousel from "../../../components/GlobalCarousel";
 import axios from "axios";
-import { Close } from "@mui/icons-material";
+import { Close, Help, QuestionMarkOutlined } from "@mui/icons-material";
 
 const Consultation = () => {
 
@@ -70,6 +70,8 @@ const Consultation = () => {
   const [obraSocial, setObraSocial] = useState(false);
   const [servicePack, setServicePack] = useState([])
   const [packId, setPackId] = useState(crypto.randomUUID())
+  const [requesterName, setRequesterName] = useState("")
+  const [requesterDNI, setRequesterDNI] = useState("")
 
   // Contenedores de responses
   const [services, setServices] = useState([])
@@ -153,6 +155,7 @@ const Consultation = () => {
     if (loading) return;
 
     setLoading(true);
+    console.log("loading set true (handlePatientFetch)")
 
       axios
         .get(`${route}/paciente/buscar/${values.fetchdni}`)
@@ -184,7 +187,7 @@ const Consultation = () => {
             severity: "error"
           });
         })
-        .finally(setLoading(false))
+        .finally(setLoading(false),console.log("loading set false (handlePatientFetch)"))
 
   }
 
@@ -192,6 +195,7 @@ const Consultation = () => {
   const handleFormSubmit = async (values) => {
 
     setLoading(true);
+    console.log("loading set true (handleFormSubmit)")
     
    await axios
       .post(`${route}/paciente/crear`, values)
@@ -204,8 +208,8 @@ const Consultation = () => {
         setPatient(response.data);
         setAskForDNI(false)
         setServicesCard(true)
+        setSettingPatient(false)
       })
-      setSettingPatient(false)
       .catch((error) => {
         setSnackbar({
           open: true,
@@ -213,7 +217,7 @@ const Consultation = () => {
           severity: "error"
         });
       })
-      .finally(setLoading(false))
+      .finally(setLoading(false), console.log("loading set false (handleFormSubmit)"))
 
   };
 
@@ -248,6 +252,17 @@ const Consultation = () => {
 
     setTargetDoc(e.target.value)
     
+    await axios
+    .get(`${route}/consulta_medica/pedir/${e.target.value.id_persona}`)
+    .then(response => {
+
+      console.log(response)
+
+    })
+    .catch((error) => {
+      console.log(error);
+    })
+
     setTargetDay(dayjs());
     setTargetHour(dayjs());
 
@@ -278,7 +293,8 @@ const Consultation = () => {
   const handleConsultationSubmit = async () => {
 
     setLoading(true);
-    
+    console.log("loading set true (handleConsultationSubmit)")
+
     // Prepara datos de consulta medica
     let preparedConsultation = {
       fechaTurno: targetDay.format("YYYY-MM-DD"),
@@ -295,6 +311,8 @@ const Consultation = () => {
 
     let data = {
       codigo_paquete: packId,
+      nombreSolicitante: requesterName,
+      dniSolicitante: requesterDNI,
       consultas: request
     }
 
@@ -326,7 +344,7 @@ const Consultation = () => {
           severity: "error"
         });
       })
-      .finally(setLoading(false))
+      .finally(setLoading(false), console.log("loading set false (handleConsultationSubmit)"))
   }
 
   // Adicion de servicio adicional
@@ -401,7 +419,7 @@ const Consultation = () => {
     <GlobalCarousel />
     <Container maxWidth="xl" sx={{ py: 8 }}>
       <Typography variant="h3" textAlign="center" mb={2}>Agendar consultas</Typography>
-      <Typography mx={10} variant="h4" textAlign={"center"}>Estimado cliente, desde este portal puede pedir una cita con uno de nuestros médicos. Escriba la cédula del paciente y rellene el formulario si no ha sido registrado antes. Una vez hecho, podrá elegir uno de nuestros servicios y concertar una cita.</Typography>
+      <Typography mx={10} variant="h4" color="textSecondary" textAlign={"center"}>Estimado cliente, desde este portal puede pedir una cita con uno de nuestros médicos. Escriba la cédula del paciente y rellene el formulario si no ha sido registrado antes. Una vez hecho, podrá elegir uno de nuestros servicios y concertar una cita.</Typography>
   {/* Seccion paciente */}
       <Grid2 container mt={4} spacing={4} display='flex'>
         {/* Espaciado */}
@@ -546,6 +564,17 @@ const Consultation = () => {
                           error={!!touched.direccion && !!errors.direccion}
                           helperText={touched.direccion && errors.direccion}
                         />
+                        <FormControl  sx={{ mr:10}}>
+                          <FormLabel>Sexo <Tooltip title="Se refiere al sexo asignado al nacer por un médico, no a la identidad de género actual."><Badge><Help sx={{fontSize:16, color:"gray"}}/></Badge></Tooltip></FormLabel>
+                          <RadioGroup
+                            onChange={handleChange}
+                            name="genero"
+                          >
+                            <FormControlLabel value="Hombre" control={<Radio />} label="Hombre" />
+                            <FormControlLabel value="Mujer" control={<Radio />} label="Mujer" />
+                            <FormControlLabel value="Intersexual" control={<Radio />} label="Intersexual" />
+                          </RadioGroup>
+                        </FormControl>
 
                         <Box>
                         <FormControlLabel 
@@ -553,6 +582,7 @@ const Consultation = () => {
                           name="obraSocial"
                           control={<Checkbox checked={values.obraSocial} />} 
                           label="¿Obra social?" 
+                          sx={{mt:3}}
                         />
                         </Box>
                       
@@ -645,7 +675,7 @@ const Consultation = () => {
               </Box>
               <Box sx={cardBox}>
                 <Collapse orientation='vertical' in={doctorDropdown}>
-                  <FormControl sx={{minWidth:"370px"}} required>
+                  <FormControl sx={{minWidth:"330px"}} required>
                     <InputLabel>Doctor</InputLabel>
                     <Select
                       name="doctor"
@@ -764,37 +794,30 @@ const Consultation = () => {
                title={<Typography variant="h3" gutterBottom>Clínica JuntoSalud</Typography>}
               />
               <CardContent sx={{m:2}}>
-              <Typography variant="h4" color="textSecondary">Por favor, revise que la información sea correcta. </Typography>
-              <Grid2 mb={3} container spacing={6}>
-                <Grid2 size={{sm:12, md:6}}>
-                {/* Info de paciente */}
-                  <Typography variant="h4" my={1}>Detalles del paciente</Typography>
-                  <Typography><b>Nombre:</b> {patient.nombre} {patient.apellido}</Typography>
-                  <Typography><b>Cédula:</b> {patient.dni}</Typography>
-                  <Typography><b>Fecha de nacimiento:</b> {patient.fechaNac}</Typography>
-                  <Typography><b>Correo:</b> {patient.email}</Typography>
-                  <Typography><b>Contacto:</b> {patient.telefono}</Typography>
-                  <Typography><b>Dirección:</b> {patient.direccion}</Typography>
-                  <Typography><b>Obra social:</b> {patient.obraSocial ? "Si" : "No"}</Typography>
-                </Grid2>
-                <Grid2 size={{sm:12, md:6}}>
-              {/* Info de servicio */}
-              {targetService && (
-                  <>
-                    <Typography variant="h4" my={1}>Detalles de la consulta</Typography>
-                    <Typography><b>Servicio:</b> {targetService.nombre}</Typography>
-                    <Typography><b>Descripción:</b> {targetService.descripcion}</Typography>
-                    <Typography><b>Precio:</b> $ {targetService.precio}</Typography>
-                    <Typography><b>Duración estimada:</b> {targetService.duracion}</Typography>
-                    <Typography><b>Fecha:</b> {""+targetDay.format('DD/MM/YYYY')}</Typography>
-                    <Typography><b>Hora:</b> {""+targetHour.format('HH:mm')}</Typography>
-                    {targetDoc && (<Typography><b>Médico tratante:</b> {targetDoc.nombre} {targetDoc.apellido}</Typography>)}
-                  </>
-              )}    
-                </Grid2>
-              </Grid2>
-              <Typography mb={2} variant="h5" color="textSecondary">Si desea añadir servicios adicionales, presione Añadir servicio adicional, de lo contrario, confirme el pedido.</Typography>
-                <Button disabled={loading} sx={{mr:2}} variant="contained" color="primary" onClick={() => handleConsultationSubmit() }>Confirmar pedido</Button>
+              <Typography variant="h4" color="textSecondary">Ingrese su nombre y cédula para confirmar el pedido. </Typography>
+              
+              <TextField
+                fullWidth
+                sx={{mt:2}}
+                label="Nombre"
+                name="requesterName"
+                value={requesterName}
+                onChange={(e)=> setRequesterName(e.target.value)}
+                placeholder="Nombre"
+              />
+
+              <TextField
+                fullWidth
+                sx={{mt:2}}
+                label="Cédula o DNI"
+                name="requesterDNI"
+                value={requesterDNI}
+                onChange={(e)=> setRequesterDNI(e.target.value)}
+                placeholder="Nombre"
+              />
+
+              <Typography my={2} variant="h5" color="textSecondary">Si desea añadir servicios adicionales a su pedido, presione Añadir servicio adicional, de lo contrario, confirme el pedido.</Typography>
+                <Button disabled={loading || requesterName =="" || requesterDNI == "" } sx={{mr:2}} variant="contained" color="primary" onClick={() => handleConsultationSubmit() }>Confirmar pedido</Button>
                 <Button variant="outlined" color="info" onClick={() => handleAddService()}>Añadir servicio adicional</Button>
               </CardContent>
             </Card>

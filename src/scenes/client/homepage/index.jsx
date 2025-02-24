@@ -46,7 +46,8 @@ const Homepage = () => {
       {/* Sección información */}
       <Information />
 
-      {/* Sección noticias */}
+      {/* Sección noticias (desactivado) */}
+      {/* 
       <Box sx={{py: 4 }}>
         <Container>
           <Typography variant="h3" textAlign="center" mb={6}>
@@ -85,6 +86,7 @@ const Homepage = () => {
           </Box>
         </Container>
       </Box>
+      */}
       {/* Sección mapa */}
       <Container sx={{my:10}}>
         <Typography variant="h3" textAlign="center" mb={6}>

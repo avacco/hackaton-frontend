@@ -1,5 +1,5 @@
-import { Alert, Box, Button, Card, Checkbox, CircularProgress, FormControlLabel, Snackbar, TextField, Typography } from "@mui/material"
-import { Field, Formik } from "formik"
+import { Alert, Badge, Box, Button, Card, Checkbox, CircularProgress, FormControl, FormControlLabel, FormLabel, InputLabel, MenuItem, Radio, RadioGroup, Select, Snackbar, TextField, Tooltip, Typography } from "@mui/material"
+import { Formik } from "formik"
 import * as yup from "yup"
 import Header from "../../../components/Header"
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -7,6 +7,7 @@ import { useAuth } from "../../../provider/AuthProvider";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";  
+import { Help } from "@mui/icons-material";
 
 export default function PatientForm() {
   const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -27,6 +28,7 @@ export default function PatientForm() {
     telefono: "777212312",
     direccion: "Pasaje Pintores 321",
     obraSocial: true,
+    genero: "Hombre"
   });
 
   // Define la logica de validacion para los campos
@@ -73,6 +75,7 @@ export default function PatientForm() {
             telefono: data.telefono,
             direccion: data.direccion,
             obraSocial: data.obraSocial,
+            genero: data.genero
           })
         },
       )
@@ -219,11 +222,24 @@ export default function PatientForm() {
                 helperText={touched.direccion && errors.direccion}
                 sx={{ gridColumn: "span 4" }}
              />
+             <FormControl  sx={{ gridColumn: "span 2" }}>
+             <FormLabel>Sexo <Tooltip title="Se refiere al sexo asignado al nacer por un médico, no a la identidad de género actual."><Badge><Help sx={{fontSize:16, color:"gray"}}/></Badge></Tooltip></FormLabel>
+              <RadioGroup
+                onChange={handleChange}
+                name="genero"
+              >
+                <FormControlLabel checked={values.genero === "Hombre"} value="Hombre" control={<Radio />} label="Hombre" />
+                <FormControlLabel checked={values.genero === "Mujer"} value="Mujer" control={<Radio />} label="Mujer" />
+                <FormControlLabel checked={values.genero === "Intersexual"} value="Intersexual" control={<Radio />} label="Intersexual" />
+              </RadioGroup>
+            </FormControl>            
+
               <FormControlLabel 
                 onChange={handleChange}
                 name="obraSocial"
                 control={<Checkbox checked={values.obraSocial} />} 
                 label="¿Obra social?" 
+                sx={{ gridColumn: "span 2" }}
               />  
             
             </Box>

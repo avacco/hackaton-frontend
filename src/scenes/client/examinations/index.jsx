@@ -29,7 +29,7 @@ const Examinations = () => {
   const handleFormSubmit = async (values) => {
     if (loading) return;
     setLoading(true);
-    axios
+    await axios
         .get(`${route}/consulta_medica/historial/${values.dni}`)
         .then(response => {
 
@@ -73,7 +73,7 @@ const Examinations = () => {
     <GlobalCarousel />
     <Container>
             <Typography mt={6} variant="h3" textAlign="center" mb={2}>Consultar historial de paciente</Typography>
-            <Typography mx={10} variant="h4" textAlign={"center"}>Estimado cliente, desde este portal puede pedir el historial de consultas agendadas, tanto pasadas como futuras. Escriba la cédula del paciente y presione en una de las fechas que aparecerán.</Typography>
+            <Typography mx={10} variant="h4" color="textSecondary" textAlign={"center"}>Estimado cliente, desde este portal puede pedir el historial de consultas agendadas, tanto pasadas como futuras. Escriba la cédula del paciente y presione en una de las fechas que aparecerán.</Typography>
       
       <Grid2 my={10} size={{xs:12, lg:4}}>
           <Card>
@@ -85,7 +85,7 @@ const Examinations = () => {
                   onSubmit={handleFormSubmit}
                   initialValues={initialValues}
                 >
-                {({ values, handleChange, handleSubmit }) => (
+                {({ values, errors, touched, handleChange, handleSubmit }) => (
                 <form onSubmit={handleSubmit}>
                   <Box sx={iconBox}>
                     <Box>
@@ -149,30 +149,30 @@ const Examinations = () => {
                   action={<Typography variant="h6" mr={2} color="textSecondary" gutterBottom>00/00/00</Typography>} 
                   title={<Typography variant="h3" gutterBottom>Clínica JuntoSalud</Typography>}
                 
-                />
-                  {ts && (
+                /> 
+                  {ts && ( // TODO: Adaptar a como me lo trae el DTO del back
                   <Grid2 container m={2} p={2}>
                     <Grid2 size={6}>
-                      <Typography variant="h5" gutterBottom><b>Médico asignado:</b> {historyData[ts-1].medico.nombre} {historyData[ts-1].medico.apellido}</Typography>
-                      <Typography variant="h5" gutterBottom><b>Especialidad médico:</b> {historyData[ts-1].medico.especialidadMedica} </Typography>
-                      <Typography variant="h5" gutterBottom><b>Cédula medico:</b> {historyData[ts-1].medico.dni}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Médico asignado:</b> {historyData[ts-1].nombreMedico} {historyData[ts-1].apellidoMedico}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Especialidad médico:</b> {historyData[ts-1].especialidadMedica} </Typography>
+                      <Typography variant="h5" gutterBottom><b>Cédula medico:</b> {historyData[ts-1].dniMedico}</Typography>
                       <Typography variant="h5" gutterBottom><b>Fecha asignada:</b> {historyData[ts-1].fechaTurno}</Typography>
                       <Typography variant="h5" gutterBottom><b>Hora asignada:</b> {historyData[ts-1].horaTurno}</Typography>
                     </Grid2>
                     <Grid2 size={6}>
-                      <Typography variant="h5" gutterBottom><b>Paciente a tratar:</b> {historyData[ts-1].paciente.nombre} {historyData[ts-1].paciente.apellido}</Typography>
-                      <Typography variant="h5" gutterBottom><b>Género al nacer:</b> dummy</Typography>
-                      <Typography variant="h5" gutterBottom><b>Cédula paciente:</b> {historyData[ts-1].paciente.dni}</Typography>
-                      <Typography variant="h5" gutterBottom><b>Fecha de nacimiento:</b> {historyData[ts-1].paciente.fechaNac}</Typography>
-                      <Typography variant="h5" gutterBottom><b>Contacto:</b> {historyData[ts-1].paciente.telefono}</Typography>
-                      <Typography variant="h5" gutterBottom><b>Correo:</b> {historyData[ts-1].paciente.email}</Typography>
-                      <Typography variant="h5" gutterBottom><b>Dirección:</b> {historyData[ts-1].paciente.direccion}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Paciente a tratar:</b> {historyData[ts-1].nombrePaciente} {historyData[ts-1].apellidoPaciente}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Género al nacer:</b> {historyData[ts-1].genero}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Cédula paciente:</b> {historyData[ts-1].dniPaciente}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Fecha de nacimiento:</b> {historyData[ts-1].fechaNac}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Contacto:</b> {historyData[ts-1].telefono}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Correo:</b> {historyData[ts-1].email}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Dirección:</b> {historyData[ts-1].direccion}</Typography>
                     </Grid2>
                     <Grid2 size={12}>
-                      <Typography variant="h5" gutterBottom><b>Servicio requerido:</b> {historyData[ts-1].servicio.nombre}</Typography>
-                      <Typography variant="h5" gutterBottom><b>Descripcion del servicio:</b> {historyData[ts-1].servicio.descripcion}</Typography>
-                      <Typography variant="h5" gutterBottom><b>Precio original del servicio:</b> {historyData[ts-1].servicio.precio}</Typography>
-                      <Typography variant="h5" gutterBottom><b>Duración esperada del servicio:</b> {historyData[ts-1].servicio.duracion}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Servicio requerido:</b> {historyData[ts-1].nombreServicio}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Descripcion del servicio:</b> {historyData[ts-1].descripcion}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Precio original del servicio:</b> {historyData[ts-1].precio}</Typography>
+                      <Typography variant="h5" gutterBottom><b>Duración esperada del servicio:</b> {historyData[ts-1].duracion}</Typography>
                       <Typography mt={5} variant="h4" gutterBottom><b>Pagado:</b> dummy</Typography>
                     </Grid2>
                   </Grid2>
