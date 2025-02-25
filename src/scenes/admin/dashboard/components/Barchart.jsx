@@ -1,22 +1,19 @@
 import { ResponsiveBar } from '@nivo/bar'
 import React from 'react'
-import { nivoBar as data } from '../../data/mockdata'
 
-const BarChart = () => {
+const Barchart = ({ data }) => {
   return (
     <ResponsiveBar
     data={data}
     keys={[
-        'hot dog',
-        'burger',
-        'sandwich',
-        'kebab',
-        'fries',
-        'donut'
+        'masculino',
+        'femenino',
+        'intersexual',
     ]}
-    indexBy="country"
+    indexBy="label"
     margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
     padding={0.3}
+    groupMode="grouped"
     valueScale={{ type: 'linear' }}
     indexScale={{ type: 'band', round: true }}
     colors={{ scheme: 'nivo' }}
@@ -40,36 +37,13 @@ const BarChart = () => {
             spacing: 10
         }
     ]}
-    fill={[
-        {
-            match: {
-                id: 'fries'
-            },
-            id: 'dots'
-        },
-        {
-            match: {
-                id: 'sandwich'
-            },
-            id: 'lines'
-        }
-    ]}
-    borderColor={{
-        from: 'color',
-        modifiers: [
-            [
-                'darker',
-                1.6
-            ]
-        ]
-    }}
     axisTop={null}
     axisRight={null}
     axisBottom={{
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: 'country',
+        legend: '',
         legendPosition: 'middle',
         legendOffset: 32,
         truncateTickAt: 0
@@ -78,7 +52,7 @@ const BarChart = () => {
         tickSize: 5,
         tickPadding: 5,
         tickRotation: 0,
-        legend: 'food',
+        legend: 'Cantidad',
         legendPosition: 'middle',
         legendOffset: -40,
         truncateTickAt: 0
@@ -125,4 +99,4 @@ const BarChart = () => {
   )
 }
 
-export default BarChart
+export default Barchart

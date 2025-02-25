@@ -1,8 +1,7 @@
 import { ResponsiveLine } from '@nivo/line'
 import React from 'react'
-import { nivoLine as data } from '../../data/mockdata'
 
-const LineChart = () => {
+const Linechart = ({ data }) => {
   return (
       <ResponsiveLine
         data={data}
@@ -23,7 +22,7 @@ const LineChart = () => {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: 'transportation',
+            legend: 'Meses',
             legendOffset: 36,
             legendPosition: 'middle',
             truncateTickAt: 0
@@ -32,7 +31,7 @@ const LineChart = () => {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: 'count',
+            legend: 'Cantidad',
             legendOffset: -40,
             legendPosition: 'middle',
             truncateTickAt: 0
@@ -44,6 +43,7 @@ const LineChart = () => {
         pointLabel="data.yFormatted"
         pointLabelYOffset={-12}
         enableTouchCrosshair={true}
+        enableSlices="x"
         useMesh={true}
         legends={[
             {
@@ -75,4 +75,4 @@ const LineChart = () => {
   )
 }
 
-export default LineChart
+export default Linechart

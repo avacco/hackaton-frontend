@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import es from 'dayjs/locale/es';
 import GlobalCarousel from "../../../components/GlobalCarousel";
 import axios from "axios";
-import { Close, Help, QuestionMarkOutlined } from "@mui/icons-material";
+import { Close, Help } from "@mui/icons-material";
 
 const Consultation = () => {
 
@@ -143,19 +143,12 @@ const Consultation = () => {
     let missingTimes = allTimes.filter(time => !timeBlocks.includes(time));
     setMissingBlocks(missingTimes);
   }
- 
-  // para testeo
-  const checkServices = () => {
-    console.log(servicePack)
-    console.log(patient)
-  }
-  
+   
   // Control de primer paso (Asignacion de paciente)
   const handlePatientFetch = async (values) => {
     if (loading) return;
 
     setLoading(true);
-    console.log("loading set true (handlePatientFetch)")
 
       axios
         .get(`${route}/paciente/buscar/${values.fetchdni}`)
@@ -187,7 +180,7 @@ const Consultation = () => {
             severity: "error"
           });
         })
-        .finally(setLoading(false),console.log("loading set false (handlePatientFetch)"))
+        .finally(setLoading(false),)
 
   }
 
@@ -195,7 +188,6 @@ const Consultation = () => {
   const handleFormSubmit = async (values) => {
 
     setLoading(true);
-    console.log("loading set true (handleFormSubmit)")
     
    await axios
       .post(`${route}/paciente/crear`, values)
@@ -217,7 +209,7 @@ const Consultation = () => {
           severity: "error"
         });
       })
-      .finally(setLoading(false), console.log("loading set false (handleFormSubmit)"))
+      .finally(setLoading(false))
 
   };
 
@@ -238,7 +230,6 @@ const Consultation = () => {
     setCalendarCard(false);
     setHourCard(false);
 
-    +
     setTargetService(e.target.value); // setea valor correspondiente, limpia los demas
     setTargetDoc("");
     setTargetDay(dayjs());
@@ -253,7 +244,7 @@ const Consultation = () => {
     setTargetDoc(e.target.value)
     
     await axios
-    .get(`${route}/consulta_medica/pedir/${e.target.value.id_persona}`)
+    .get(`${route}/consulta_medica/traer/medico/${e.target.value.id_persona}`)
     .then(response => {
 
       console.log(response)
@@ -289,11 +280,10 @@ const Consultation = () => {
     handleOpen();
   };
 
-  // Control de sexto paso (Creacion de consulta y envio)
+  // Control de sexto paso, final. (Creacion de consulta y envio)
   const handleConsultationSubmit = async () => {
 
     setLoading(true);
-    console.log("loading set true (handleConsultationSubmit)")
 
     // Prepara datos de consulta medica
     let preparedConsultation = {
@@ -315,7 +305,7 @@ const Consultation = () => {
       dniSolicitante: requesterDNI,
       consultas: request
     }
-
+    
    await axios
       .post(`${route}/paquete_servicio/crear`, data)
       .then(response => {
@@ -326,14 +316,8 @@ const Consultation = () => {
         });
 
         // Limpia los valores para permitir una nueva consulta
-        setTargetService("");
-        setTargetDoc("");
-        setTargetDay(dayjs());
-        setTargetHour(dayjs());
-        handleClose();
-        setHourCard(false)
-        setCalendarCard(false)
-        setDoctorDropdown(false)
+        cleanAll();
+        setPackId(crypto.randomUUID())
         setServicePack([]);
 
       })
@@ -344,7 +328,23 @@ const Consultation = () => {
           severity: "error"
         });
       })
-      .finally(setLoading(false), console.log("loading set false (handleConsultationSubmit)"))
+      .finally(setLoading(false))
+  }
+
+  const cleanAll = () => {
+    
+    setAskForDNI(true)
+    setPatient("")
+    setSettingPatient(false)
+    setServicesCard(false)
+    setTargetService("");
+    setTargetDoc("");
+    setTargetDay(dayjs());
+    setTargetHour(dayjs());
+    handleClose();
+    setHourCard(false)
+    setCalendarCard(false)
+    setDoctorDropdown(false)
   }
 
   // Adicion de servicio adicional
@@ -419,16 +419,11 @@ const Consultation = () => {
     <GlobalCarousel />
     <Container maxWidth="xl" sx={{ py: 8 }}>
       <Typography variant="h3" textAlign="center" mb={2}>Agendar consultas</Typography>
-      <Typography mx={10} variant="h4" color="textSecondary" textAlign={"center"}>Estimado cliente, desde este portal puede pedir una cita con uno de nuestros médicos. Escriba la cédula del paciente y rellene el formulario si no ha sido registrado antes. Una vez hecho, podrá elegir uno de nuestros servicios y concertar una cita.</Typography>
+      <Typography mx={10} variant="h4" color="textSecondary" textAlign={"center"}>Estimado cliente, desde este portal puede pedir una cita con uno de nuestros médicos. Escriba la cédula del paciente y rellene el formulario <b>si no ha sido registrado antes</b>. Una vez hecho, podrá elegir uno de nuestros servicios y concertar una cita.</Typography>
   {/* Seccion paciente */}
       <Grid2 container mt={4} spacing={4} display='flex'>
         {/* Espaciado */}
         <Grid2 size={{xs:12, md:2}}>
-        {/* debug
-        <Box sx={{my:2}}>
-          <Button onClick={checkServices} variant="contained">check</Button>
-        </Box>
-        */}
         </Grid2>
 
         <Grid2 size={{xs:12, md:8}}>
@@ -461,7 +456,7 @@ const Consultation = () => {
                             fullWidth
                             disabled={loading}
                           >
-                            Consultar
+                            Agendar una hora
                         </Button>
                       </Box>
                     </form>
@@ -638,6 +633,7 @@ const Consultation = () => {
                   </>
               )}    
                 </Grid2>
+                <Button variant="text" color="info" onClick={()=> cleanAll()}>Cambiar paciente</Button>
               </Grid2>
               </CardContent>
             </Card>
@@ -813,7 +809,7 @@ const Consultation = () => {
                 name="requesterDNI"
                 value={requesterDNI}
                 onChange={(e)=> setRequesterDNI(e.target.value)}
-                placeholder="Nombre"
+                placeholder="Cédula o DNI"
               />
 
               <Typography my={2} variant="h5" color="textSecondary">Si desea añadir servicios adicionales a su pedido, presione Añadir servicio adicional, de lo contrario, confirme el pedido.</Typography>

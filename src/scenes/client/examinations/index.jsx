@@ -50,6 +50,7 @@ const Examinations = () => {
             message: "Datos de paciente recuperados.",
             severity: "success"
           });
+          console.log(response.data)
           setHistoryCard(true)
           setDataCard(true)
         })
@@ -173,7 +174,7 @@ const Examinations = () => {
                       <Typography variant="h5" gutterBottom><b>Descripcion del servicio:</b> {historyData[ts-1].descripcion}</Typography>
                       <Typography variant="h5" gutterBottom><b>Precio original del servicio:</b> {historyData[ts-1].precio}</Typography>
                       <Typography variant="h5" gutterBottom><b>Duración esperada del servicio:</b> {historyData[ts-1].duracion}</Typography>
-                      <Typography mt={5} variant="h4" gutterBottom><b>Pagado:</b> dummy</Typography>
+                      <Typography mt={5} variant="h4" gutterBottom><b>Pagado:</b> No</Typography>
                     </Grid2>
                   </Grid2>
                   )}

@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react'
-import { ProSidebar, Menu, MenuItem } from 'react-pro-sidebar'
+import { Sidebar as ProSidebar, Menu, MenuItem } from 'react-pro-sidebar'
 import { Box, IconButton, Typography } from '@mui/material'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { HomeOutlined, PeopleOutlineOutlined, ContactsOutlined, ReceiptOutlined, PersonOutlineOutlined, CalendarTodayOutlined, MenuOutlined, SupervisorAccountOutlined, AdminPanelSettingsOutlined, LogoutOutlined, ManageAccountsOutlined, MedicalServicesOutlined, Person3Outlined } from '@mui/icons-material'
-import 'react-pro-sidebar/dist/css/styles.css';
 import { useAuth } from '../provider/AuthProvider'
 import axios from 'axios'
 
 // Mini componente para los items del menu.
 const Item = ({ title, to, icon, selected }) => {
   return (
-    <MenuItem active={selected === title} style={{ color: "black" }} icon={icon}>
+    <MenuItem component={<Link to={to} />} active={selected === title} style={{ color: "black" }} icon={icon}>
       <Typography>{title}</Typography>
-      <Link to={to} />
     </MenuItem>
   )
 }
@@ -65,7 +63,7 @@ const Sidebar = () => {
         break;
 
       case "/system/patientform":
-        setSelected("Formulario pacientes")
+        setSelected("Formulario paciente")
         break;
         
       case "/system/calendar":
@@ -108,23 +106,23 @@ const Sidebar = () => {
   return (
   // Overrides para estilos de sidebar
     <Box sx={{ 
-      "& .pro-sidebar-inner": {
+      "& .ps-sidebar-container": {
         background: `#F5F5F5` 
     },
-      "& .pro-icon-wrapper": {
+      "& .ps-menu-icon": {
         backgroundColor: "transparent !important"
       },
-      "& .pro-inner-item": {
+      "& .ps-inner-item": {
         padding: "5px 35px 5px 20px !important"
       },
-      "& .pro-inner-item:hover": {
+      "& .ps-menu-button:hover": {
         color: "green !important"
       },
-      "& .pro-menu-item.active": {
+      "& .ps-menuitem-root .ps-active": {
         color: "green !important"
       }}}>
       <ProSidebar collapsed={isCollapsed}>
-        <Menu iconShape="square">
+        <Menu style={{height:"120vh"}} iconShape="square">
           <MenuItem onClick={() => setIsCollapsed(!isCollapsed)} style={{ margin: "10px 0 20px 0", color: "gray"}} icon={isCollapsed ? <MenuOutlined /> : undefined} >
           {!isCollapsed && (
             <Box display="flex" justifyContent="space-between" alignItems="center" ml="15px">
@@ -166,7 +164,7 @@ const Sidebar = () => {
             <Item title="Formulario admin" to="/system/adminform/" icon={<SupervisorAccountOutlined />} selected={selected} />
             <Item title="Formulario médicos" to="/system/form" icon={<PersonOutlineOutlined />} selected={selected} />
             <Item title="Formulario servicios" to="/system/serviceform" icon={<ManageAccountsOutlined />} selected={selected} />
-            <Item title="Formulario pacientes" to="/system/patientform" icon={<Person3Outlined />} selected={selected} />
+            <Item title="Formulario paciente" to="/system/patientform" icon={<Person3Outlined />} selected={selected} />
             
            {/* <Item title="Citas" to="/system/calendar" icon={<CalendarTodayOutlined />} selected={selected} />*/}
 

@@ -129,7 +129,7 @@ export default function Form() {
               .then((response) => {
                   setSnackbar({
                     open: true,
-                    message: "Medico añadido",
+                    message: state ? "Medico editado" : "Medico añadido",
                     severity: "success"
                   });
                   setLoading(false)

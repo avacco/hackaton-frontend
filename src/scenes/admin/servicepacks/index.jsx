@@ -24,11 +24,14 @@ const ServicePacks = () => {
     }
   );
 
-  const initialValues = {dni: ""}
+  const initialValues = {
+    dni: "",
+  }
 
   const schema = yup.object().shape({
     dni: yup.string().required("Requerido"),
   })
+
 
   const cardStyle = {
     padding: "20px",
@@ -76,11 +79,16 @@ const ServicePacks = () => {
     setLoading(true);
 
     await axios
-    .get(`${route}/paquete_servicio/pedir/${values.dni}`,{
+    .get(`${route}/paquete_servicio/traer/dni/${values.dni}`,{
       headers: { Authorization: "Bearer "+token }
     })
     .then(response => {
       setresponsedata(response.data)
+      setSnackbar({
+        open: true,
+        message: "Datos traídos",
+        severity: "info"      
+    })
     })
     .catch((error) => { 
       setSnackbar({
@@ -182,6 +190,7 @@ const ServicePacks = () => {
               <Typography variant="h5" gutterBottom><b>Contacto:</b> {selectedPack.consultas[ts-1].paciente.telefono}</Typography>
               <Typography variant="h5" gutterBottom><b>Correo:</b> {selectedPack.consultas[ts-1].paciente.email}</Typography>
               <Typography variant="h5" gutterBottom><b>Dirección:</b> {selectedPack.consultas[ts-1].paciente.direccion}</Typography>
+              <Typography variant="h5" gutterBottom><b>Obra social:</b> {selectedPack.consultas[ts-1].paciente.obraSocial ? "Si" : "No"}</Typography>
             </Grid2>
             <Grid2 size={12}>
               <Typography variant="h5" gutterBottom><b>Servicio requerido:</b> {selectedPack.consultas[ts-1].servicio.nombre}</Typography>
@@ -204,6 +213,7 @@ const ServicePacks = () => {
                 <TableCell>ID</TableCell>
                 <TableCell>Nombre solicitante</TableCell>
                 <TableCell>Fecha creación</TableCell>  
+                <TableCell>Cédula</TableCell>     
                 <TableCell>Monto total</TableCell>     
         {/*     <TableCell>¿Pagado?</TableCell>        */} 
             <TableCell>Acciones</TableCell>
@@ -219,6 +229,7 @@ const ServicePacks = () => {
                   <TableCell>{pack.nombreSolicitante}</TableCell>
                   {/* Para fecha de creacion, monto total y si es pagado o no */}
                   <TableCell>{pack.fechaCreacion}</TableCell> 
+                  <TableCell>{pack.dniSolicitante}</TableCell>
                   <TableCell>$ {pack.precioPaquete}</TableCell> 
              {/*     <TableCell>{}</TableCell> */}
                   <TableCell>
