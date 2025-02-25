@@ -197,7 +197,6 @@ const ServicePacks = () => {
               <Typography variant="h5" gutterBottom><b>Descripcion del servicio:</b> {selectedPack.consultas[ts-1].servicio.descripcion}</Typography>
               <Typography variant="h5" gutterBottom><b>Precio original del servicio:</b> {selectedPack.consultas[ts-1].servicio.precio}</Typography>
               <Typography variant="h5" gutterBottom><b>Duración esperada del servicio:</b> {selectedPack.consultas[ts-1].servicio.duracion}</Typography>
-              <Typography mt={5} variant="h4" gutterBottom><b>Pagado:</b> No</Typography>
             </Grid2>
           </Grid2>
         </Card> 
