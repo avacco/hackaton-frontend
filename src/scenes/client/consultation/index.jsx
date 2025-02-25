@@ -247,7 +247,7 @@ const Consultation = () => {
     .get(`${route}/consulta_medica/traer/medico/${e.target.value.id_persona}`)
     .then(response => {
 
-      console.log(response)
+      //TODO: Atajar horas, ponerlas en prohibicion
 
     })
     .catch((error) => {

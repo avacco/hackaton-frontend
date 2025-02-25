@@ -5,7 +5,6 @@ import { DownloadOutlined, EmailOutlined } from '@mui/icons-material'
 import Linechart from './components/LineChart'
 import Piechart from './components/PieChart'
 import Barchart from './components/BarChart'
-import StatBox from './components/StatBox'
 import { nivoLine, nivoPie, nivoBar } from '../../../../data/mockdata';
 import axios from 'axios'
 import { useAuth } from '../../../provider/AuthProvider'
@@ -101,7 +100,7 @@ export default function Dashboard() {
     },)
     .then((bar) => {
 console.log(bar.data)
-      // Prepara datos para grafico
+      // Estos datos solo necesitaban ser metidos en un array
       setBarData([bar.data])
 
   }).catch((error) => {
@@ -195,8 +194,8 @@ console.log(bar.data)
         <Grid2 size={{md: 12, lg:3}} mt={2}>
         <Card>
             <Box m={2}>
-              <Typography variant='h5' fontWeight="600">Pacientes por sexo<IconButton><DownloadOutlined sx={{ fontSize: "26px"}} /></IconButton></Typography>
-              <Typography variant='h5' fontWeight="500">Cantidad de pacientes atendidos segun su sexo</Typography>
+              <Typography variant='h5' fontWeight="600">Pacientes atendidos por su sexo<IconButton><DownloadOutlined sx={{ fontSize: "26px"}} /></IconButton></Typography>
+              <Typography variant='h5' fontWeight="500">Cantidad de pacientes por consulta, ordenados por su sexo</Typography>
             </Box>
             <Box height="350px" width="100%" ml="-10px">
               <Barchart data={barData} />
