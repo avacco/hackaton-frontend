@@ -27,7 +27,9 @@ npm run dev
 
 ## Advertencias
 
-El archivo vite.config.js fue modificado para aceptar certificados autofirmados con fines de demostración. Es recomendable eliminar las siguientes lineas de código si se quiere trabajar con HTTPS.
+El archivo vite.config.js fue modificado para aceptar certificados autofirmados con fines de demostración. Para que esto funcione, hay que además aceptar la dirección del backend en el navegador, que al estar su certificado autofirmado, este se considera inseguro.
+
+Es recomendable eliminar las siguientes lineas de código si se quiere trabajar con HTTPS.
 
 ```bash
 server: {
