@@ -80,8 +80,6 @@ export default function Dashboard() {
       headers: { Authorization: "Bearer "+token }
     },)
     .then((pie) => {
-      console.log("PIE DATA")
-      console.log(pie.data)
 
       // Estos datos son traidos tal cual son necesitados
       setPieData(pie.data)
@@ -102,7 +100,7 @@ export default function Dashboard() {
       headers: { Authorization: "Bearer "+token }
     },)
     .then((bar) => {
-
+console.log(bar.data)
       // Prepara datos para grafico
       setBarData([bar.data])
 
@@ -170,8 +168,8 @@ export default function Dashboard() {
         <Grid2 size={{lg:12}} mt={2} >
           <Card>
             <Box m={2}>
-              <Typography variant='h5' fontWeight="600">Grafico de linea<IconButton><DownloadOutlined sx={{ fontSize: "26px"}} /></IconButton></Typography>
-              <Typography variant='h5' fontWeight="500">Subtitulo</Typography>
+              <Typography variant='h5' fontWeight="600">Servicios por meses<IconButton><DownloadOutlined sx={{ fontSize: "26px"}} /></IconButton></Typography>
+              <Typography variant='h5' fontWeight="500">Cantidad de servicios a lo largo del año</Typography>
             </Box>
             <Box height="350px" width="100%" ml="-10px">
               <Linechart data={lineData} />
@@ -186,7 +184,7 @@ export default function Dashboard() {
         <Card>
             <Box m={2}>
               <Typography variant='h5' fontWeight="600">Servicios mas pedidos<IconButton><DownloadOutlined sx={{ fontSize: "26px"}} /></IconButton></Typography>
-              <Typography variant='h5' fontWeight="500">Subtitulo</Typography>
+              <Typography variant='h5' fontWeight="500">Servicios mas solicitados por clientes</Typography>
             </Box>
             <Box height="350px" width="100%" ml="-20px">
               <Piechart data={pieData} />
@@ -198,7 +196,7 @@ export default function Dashboard() {
         <Card>
             <Box m={2}>
               <Typography variant='h5' fontWeight="600">Pacientes por sexo<IconButton><DownloadOutlined sx={{ fontSize: "26px"}} /></IconButton></Typography>
-              <Typography variant='h5' fontWeight="500">Subtitulo</Typography>
+              <Typography variant='h5' fontWeight="500">Cantidad de pacientes atendidos segun su sexo</Typography>
             </Box>
             <Box height="350px" width="100%" ml="-10px">
               <Barchart data={barData} />

@@ -1,8 +1,8 @@
 export const nivoBar = [
   {
-    "label": "Sexo",
-    "masculino": 137,
-    "femenino": 177,
+    "sexo": "Sexo",
+    "hombre": 137,
+    "mujer": 177,
     "intersexual": 7,
   },
 ]

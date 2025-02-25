@@ -6,11 +6,11 @@ const Barchart = ({ data }) => {
     <ResponsiveBar
     data={data}
     keys={[
-        'masculino',
-        'femenino',
+        'hombre',
+        'mujer',
         'intersexual',
     ]}
-    indexBy="label"
+    indexBy="sexo"
     margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
     padding={0.3}
     groupMode="grouped"
